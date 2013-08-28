@@ -1,6 +1,6 @@
 {
-  "name": "apiserver.builder",
-  "repository": { "type": "git", "url": "https://github.com/okdas/apiserver.git" },
+  "name": "play.builder",
+  "repository": { "type": "git", "url": "https://github.com/okdas/play.git" },
   "private": true,
   "config": {
     "build": {
@@ -19,6 +19,7 @@
     "start": "node app/node.js"
   },
   "devDependencies": {
+    "coffee-script": "latest",
     "grunt": "latest",
     "grunt-contrib-clean": "latest",
     "grunt-contrib-copy": "latest",
