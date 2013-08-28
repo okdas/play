@@ -13,6 +13,7 @@ class Item
         @titleRu= data.itemTitleRu
         @titleEn= data.itemTitleEn
         @price= data.itemPrice
+        @amount= data.itemAmount
         @material= data.itemMaterial
         @imageUrl= data.itemImageUrl
         @enchantability= data.itemEnchantability
@@ -271,8 +272,8 @@ app.post '/servers/:serverId(\\d+)/items/:itemId/order', access, (req, res, next
             conn.query "
                 SELECT
                     Enchantment.id,
-                    Enchantment.levelmax as levelMax,
-                    1 as levelMin
+                    Enchantment.levelMax,
+                    Enchantment.levelMin
                 FROM
                     ?? as Enchantment
                 WHERE
@@ -458,10 +459,8 @@ app.get '/servers/:serverName', access, (req, res, next) ->
                     Server.id,
                     Server.name,
                     Server.title
-
                 FROM
                     ?? as Server
-
                 WHERE
                     Server.name = ?
                 "
@@ -496,6 +495,7 @@ app.get '/servers/:serverName', access, (req, res, next) ->
                     Item.titleRu as itemTitleRu,
                     Item.titleEn as itemTitleEn,
                     Item.price as itemPrice,
+                    Item.amount as itemAmount,
                     Material.id as itemMaterial,
                     Material.imageUrl as itemImageUrl,
                     Material.enchantability as itemEnchantability,
