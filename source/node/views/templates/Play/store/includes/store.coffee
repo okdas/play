@@ -82,7 +82,7 @@ app.controller 'StoreCtrl', ($scope, serverList) ->
 
 
 
-app.controller 'StoreServerCtrl', ($scope, $rootScope, $routeParams, $q, StoreServer, StoreServerItem, $log) ->
+app.controller 'StoreServerCtrl', ($scope, $rootScope, $routeParams, $q, StoreServer, $log) ->
     $scope.state= null
 
     $scope.store.server= StoreServer.get $routeParams, ->
@@ -102,36 +102,10 @@ app.controller 'StoreServerCtrl', ($scope, $rootScope, $routeParams, $q, StoreSe
             $scope.state= 'error'
 
 
-    $scope.order= (item) ->
-        $log.info 'купить предмет', item
-        StoreServerItem.order
-            serverId: $scope.store.server.id
-            itemId: item.id
-            item: item
-
-
 
 
 
 app.controller 'StoreServerItemCtrl', ($scope, $rootScope) ->
-    $scope.amount= 1
-
-    $scope.buyItem= (item) =>
-        return if not $scope.amount
-
-        found= null
-        for itm in $scope.cart.items
-            if not found and itm.id == item.id
-                found= itm
-
-        if not found
-            found= angular.copy item
-            found.amount= 0
-            $scope.cart.items.push found
-
-        amount= (found.amount|0) + ($scope.amount|0)
-        found.amount= if amount > 99999 then 99999 else amount
-        #$scope.amount= 1
 
     $scope.showItemDetails= () ->
         $rootScope.item= $scope.item
@@ -241,7 +215,7 @@ app.filter 'EnchantmentLevel', () ->
 
 
 
-app.controller 'StoreServerItemDetailsCtrl', ($scope, $rootScope) ->
+app.controller 'StoreServerItemDetailsCtrl', ($scope, $rootScope, StoreServerItem) ->
     $scope.item= angular.copy $scope.item
     $scope.itemPrice= $scope.item.price
 
@@ -269,6 +243,19 @@ app.controller 'StoreServerItemDetailsCtrl', ($scope, $rootScope) ->
             $scope.item.enchantments.splice i, 1
             $scope.updatePrice 0 - price
 
+    $scope.orderState= 'none'
+    $scope.order= (item) ->
+        $scope.orderState= 'pending'
+        order=
+            serverId: $scope.store.server.id
+            itemId: item.id
+            item: item
+        StoreServerItem.order order, () ->
+                console.log 'получилось'
+                $scope.orderState= 'done'
+        ,   () ->
+                console.log 'не получилось'
+                $scope.orderState= 'fail'
 
 
 
