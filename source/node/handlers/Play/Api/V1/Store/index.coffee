@@ -124,40 +124,365 @@ app.get '/', access, (req, res, next) ->
 
 
 
+
+
+maria= () ->
+    (req, res, next) ->
+        req.maria= null
+
+        console.log 'maria...'
+
+        req.db.getConnection (err, conn) ->
+            if not err
+                req.maria= conn
+
+                req.on 'end', () ->
+                    console.log 'request end', arguments
+
+                console.log 'maria.'
+
+            next err
+
+
+
+maria.Server= class Server
+    @table: 'server'
+
+    constructor: (data) ->
+        @id= data.id
+        @name= data.name
+        @title= data.title
+
+    @query: (maria, done) ->
+        maria.query "
+            SELECT
+                Server.id,
+                Server.name,
+                Server.title
+            FROM
+                ?? as Server
+            "
+        ,   [@table]
+        ,   (err, rows) =>
+
+                if not err
+                    servers= []
+                    for row in rows
+                        servers.push new @ row
+
+                done err, servers
+
+    @get: (name, maria, done) ->
+        maria.query "
+            SELECT
+                Server.id,
+                Server.name,
+                Server.title
+            FROM
+                ?? as Server
+            WHERE
+                Server.name = ?
+            "
+        ,   [@table, name]
+        ,   (err, rows) ->
+
+                server= null
+                if not err
+                    server= rows[0] or null
+
+                done err, server
+
+
+
+maria.Server.Store= class ServerStore
+
+    @table= 'server_store'
+
+    constructor: () ->
+
+
+
+maria.Server.Enchantment= class ServerEnchantment
+    @table= 'bukkit_enchantment'
+
+    constructor: (data) ->
+        @id= data.id
+        @titleRu= data.titleRu
+        @titleEn= data.titleEn
+        @levelMin= data.levelMin
+        @levelMax= data.levelMax
+
+    @query: (serverId, maria, done) ->
+        enchantments= null
+
+        maria.query "
+            SELECT
+                ServerEnchantment.id,
+                ServerEnchantment.titleRu,
+                ServerEnchantment.titleEn,
+                ServerEnchantment.levelMin,
+                ServerEnchantment.levelMax
+            FROM
+                ?? as ServerEnchantment
+            "
+        ,   [@table]
+        ,   (err, rows) =>
+
+                if not err
+                    enchantments= []
+                    for row in rows
+                        enchantments.push new @ row
+
+                done err, enchantments
+
+
+
+maria.Server.Item= class ServerItem
+
+    @table= 'server_item'
+
+    @tableItem= 'item'
+    @tableMaterial= 'bukkit_material'
+
+    constructor: (data) ->
+        @id= data.id
+        @amount= data.amount
+        @price= data.price
+        
+        @name= data.name
+
+        @titleRu= data.itemTitleRu or data.materialTitleRu
+        @titleEn= data.itemTitleEn or data.materialTitleEn
+
+        @imageUrl= data.itemImageUrl or data.materialImageUrl
+
+        @material= data.material
+        @enchantability= data.enchantability
+
+
+    @query: (serverId, maria, done) ->
+        items= null
+
+        maria.query "
+            SELECT
+
+                Item.id,
+                Item.amount,
+                Item.price,
+                Item.name,
+
+                Item.titleRu as itemTitleRu,
+                Material.titleRu as materialTitleRu,
+
+                Item.titleEn as itemTitleEn,
+                Material.titleEn as materialTitleEn,
+
+                Item.imageUrl as itemImageUrl,
+                Material.imageUrl as materialImageUrl,
+
+                Material.id as material,
+                Material.enchantability as enchantability
+
+            FROM
+                ?? as ServerItem
+            JOIN
+                ?? as Item
+                ON Item.id= ServerItem.itemId
+            JOIN
+                ?? as Material
+                ON Material.id= Item.material
+            WHERE
+                ServerItem.serverId = ?
+            "
+        ,   [@table, @tableItem, @tableMaterial, serverId]
+        ,   (err, rows) =>
+
+                if not err
+                    items= []
+                    for row in rows
+                        items.push new @ row
+
+                done err, items
+
+
+
+maria.Server.Item.Enchantment= class ServerItemEnchantment
+
+    @table= 'item_enchantment'
+
+
+    constructor: (data) ->
+        
+        @itemId= data.itemId
+        @enchantmentId= data.enchantmentId
+        
+        @level= data.level
+
+
+    @queryByIds: (ids, maria, done) ->
+        enchantments= null
+
+        maria.query "
+            SELECT
+                
+                ItemEnchantment.itemId,
+                ItemEnchantment.enchantmentId,
+
+                ItemEnchantment.level
+
+            FROM
+                ?? as ItemEnchantment
+
+            WHERE
+                ItemEnchantment.itemId IN(?)
+
+            ORDER BY
+                ItemEnchantment.order ASC
+            "
+        ,   [@table, ids]
+        ,   (err, rows) =>
+
+                if not err
+                    enchantments= []
+                    for row in rows
+                        enchantments.push new @ row
+
+                done err, enchantments
+
+
+
+loadServers= (Server) ->
+    (req, res, next) ->
+        req.servers= null
+
+        console.log 'load servers...'
+
+        Server.query req.maria, (err, servers) ->
+            req.servers= servers
+
+            console.log 'servers.', arguments
+
+            next err
+
+
+
+loadServer= (name, Server) ->
+    (req, res, next) ->
+        req.server= null
+
+        name= req.param name
+
+        console.log "load server (#{name})..."
+
+        Server.get name, req.maria, (err, server) ->
+            req.server= server
+
+            console.log 'server (#{name}).', arguments
+
+            next err
+
+
+
+loadServerEnchantments= (ServerEnchantment) ->
+    (req, res, next) ->
+        req.server.enchantments= null
+
+        serverId= req.server.id
+
+        console.log "load server (#{serverId}) enchantments..."
+
+        ServerEnchantment.query serverId, req.maria, (err, enchantments) ->
+            req.server.enchantments= enchantments
+
+            console.log "server (#{serverId}) enchantments."
+
+            next err
+
+
+
+loadServerItems= (ServerItem) ->
+    (req, res, next) ->
+        req.server.items= null
+
+        serverId= req.server.id
+
+        console.log "load server (#{serverId}) items..."
+
+        ServerItem.query serverId, req.maria, (err, items) ->
+            req.server.items= items
+
+            console.log "server (#{serverId}) items."
+
+            next err
+
+
+
+loadServerItemsEnchantments= (ServerItemEnchantment) ->
+    (req, res, next) ->
+        
+        serverId= req.server.id
+
+        idx= {}
+        ids= []
+        for item in req.server.items
+            if not item.enchantability
+                continue
+            if not idx[item.id]
+                idx[item.id]= item
+                ids.push item.id
+
+                item.enchantments= []
+
+        console.log "load server `#{serverId}` items enchantments..."
+
+        ServerItemEnchantment.queryByIds ids, req.maria, (err, enchantments) ->
+
+            console.log ids, enchantments
+
+            if not err
+                for ench in enchantments
+                    item= idx[ench.itemId]
+                    if item
+                        item.enchantments.push
+                            id: ench.id
+                            level: ench.level
+
+            console.log "server `#{serverId}` items enchantments."
+
+            next err
+
+
+
 ###
 Отдает список серверов аутентифицированному игроку.
 ###
-app.get '/servers', access, (req, res, next) ->
+app.get '/servers'
+,   access
+,   maria(app.get 'db')
 
-    servers= []
+,   loadServers(maria.Server)
 
-    async.waterfall [
+,  (req, res) ->
 
-        (done) ->
-            req.db.getConnection (err, conn) ->
-                return done err, conn
+        res.json 200, req.servers
 
-        (conn, done) ->
-            # Извлечь все предметы магазина
-            conn.query "
-                SELECT
-                    Server.id,
-                    Server.name,
-                    Server.title
 
-                FROM
-                    ?? as Server
-                "
-            ,   ['server']
-            ,   (err, rows) ->
-                    servers= rows if not err
-                    return done err, conn
 
-    ],  (err, conn) ->
-            do conn.end if conn
+###
+Отдает магазин сервера аутентифицированному игроку.
+###
+app.get '/servers/:serverName'
+,   access
+,   maria(app.get 'db')
 
-            return next err if err
-            return res.json 200, servers
+,   loadServer('serverName', maria.Server)
+,   loadServerEnchantments(maria.Server.Enchantment)
+,   loadServerItems(maria.Server.Item)
+,   loadServerItemsEnchantments(maria.Server.Item.Enchantment)
+
+, (req, res) ->
+
+        res.json 200, req.server
 
 
 
@@ -437,109 +762,3 @@ app.post '/servers/:serverId(\\d+)/items/:itemId/order', access, (req, res, next
 
                     return next err if err
                     return res.json 201, item
-
-
-###
-Отдает магазин сервера аутентифицированному игроку.
-###
-app.get '/servers/:serverName', access, (req, res, next) ->
-
-    serverName= req.params.serverName
-    server= null
-
-    async.waterfall [
-
-        (done) ->
-            req.db.getConnection (err, conn) ->
-                return done err, conn
-
-        (conn, done) ->
-            conn.query "
-                SELECT
-                    Server.id,
-                    Server.name,
-                    Server.title
-                FROM
-                    ?? as Server
-                WHERE
-                    Server.name = ?
-                "
-            ,   ['server', serverName]
-            ,   (err, rows) ->
-                    server= do rows.shift if not err and rows.length
-                    return done err, conn
-
-        (conn, done) ->
-            conn.query "
-                SELECT
-                    ServerEnchantment.id,
-                    ServerEnchantment.titleRu,
-                    ServerEnchantment.titleEn,
-                    ServerEnchantment.levelMin,
-                    ServerEnchantment.levelMax
-                FROM
-                    ?? as ServerEnchantment
-                "
-            ,   ['bukkit_enchantment']
-            ,   (err, rows) ->
-                    server.enchantments= rows if not err
-                    return done err, conn
-
-        (conn, done) ->
-            return done null, conn if not server
-            conn.query "
-                SELECT
-                    *,
-                    Item.id as itemId,
-                    Item.name as itemName,
-                    Item.titleRu as itemTitleRu,
-                    Item.titleEn as itemTitleEn,
-                    Item.price as itemPrice,
-                    Item.amount as itemAmount,
-                    Material.id as itemMaterial,
-                    Material.imageUrl as itemImageUrl,
-                    Material.enchantability as itemEnchantability,
-                    Enchantment.id as enchantmentId,
-                    Enchantment.titleRu as enchantmentTitleRu,
-                    Enchantment.titleEn as enchantmentTitleEn,
-                    Enchantment.levelMin as enchantmentLevelMin,
-                    Enchantment.levelMax as enchantmentLevelMax,
-                    ItemEnchantment.level as enchantmentLevel,
-                    ItemEnchantment.order as enchantmentOrder
-                FROM
-                    ?? as ServerItem
-                JOIN
-                    ?? as Item
-                    ON Item.id = ServerItem.itemId
-                JOIN
-                    ?? as Material
-                    ON Material.id = Item.material
-                LEFT OUTER JOIN
-                    ?? as ItemEnchantment
-                    ON ItemEnchantment.itemId = Item.id AND Material.enchantability IS NOT NULL
-                LEFT OUTER JOIN
-                    ?? as Enchantment
-                    ON Enchantment.id = ItemEnchantment.enchantmentId
-                WHERE
-                    ServerItem.serverId = ?
-                "
-            ,   ['server_item', 'item', 'bukkit_material', 'item_enchantment', 'bukkit_enchantment', server.id]
-            ,   (err, rows) ->
-                    server.items= []
-                    if not err
-                        itemIds= {}
-                        for row in rows
-                            item= itemIds[row.itemId]
-                            if not item
-                                server.items.push item= itemIds[row.itemId]= new Item row
-                            if item.enchantability and row.enchantmentId
-                                item.enchantments= [] if not item.enchantments
-                                item.enchantments.push new Enchantment row
-                    return done err, conn
-
-    ],  (err, conn) ->
-            do conn.end if conn
-
-            return next err if err
-            return res.json 404, server if not server
-            return res.json 200, server
