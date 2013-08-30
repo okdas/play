@@ -1,6 +1,10 @@
 express= require 'express'
 async= require 'async'
 
+extend= require 'extend'
+deferred= require 'deferred'
+
+
 access= (req, res, next) ->
     return next 401 if do req.isUnauthenticated
     return do next
@@ -137,7 +141,9 @@ maria= () ->
                 req.maria= conn
 
                 req.on 'end', () ->
-                    console.log 'request end', arguments
+                    if req.maria
+                        req.maria.end () ->
+                            console.log 'request end', arguments
 
                 console.log 'maria.'
 
@@ -370,14 +376,20 @@ loadServer= (name, Server) ->
     (req, res, next) ->
         req.server= null
 
-        name= req.param name
+        serverName= req.param name
+        if not serverName
+            return next 404
 
-        console.log "load server (#{name})..."
+        console.log "load server (%s)...", serverName
 
-        Server.get name, req.maria, (err, server) ->
+        Server.get serverName, req.maria, (err, server) ->
             req.server= server
 
-            console.log 'server (#{name}).', arguments
+            console.log 'server (#{serverName}).', arguments
+
+            if not server and not err
+                res.status 404
+                err= 'server not found'
 
             next err
 
@@ -435,17 +447,24 @@ loadServerItemsEnchantments= (ServerItemEnchantment) ->
 
         console.log "load server `#{serverId}` items enchantments..."
 
+        enchIdx= {}
+        for ench in req.server.enchantments
+            if not enchIdx[ench.id]
+                enchIdx[ench.id]= ench
+
         ServerItemEnchantment.queryByIds ids, req.maria, (err, enchantments) ->
 
-            console.log ids, enchantments
+            console.log 'items enchantments', ids, enchantments
 
             if not err
-                for ench in enchantments
-                    item= idx[ench.itemId]
+                for itemEnch in enchantments
+                    item= idx[itemEnch.itemId]
                     if item
-                        item.enchantments.push
-                            id: ench.id
-                            level: ench.level
+                        ench= enchIdx[itemEnch.enchantmentId]
+                        if ench
+                            itemEnch= extend {}, ench,
+                                level: itemEnch.level
+                            item.enchantments.push itemEnch
 
             console.log "server `#{serverId}` items enchantments."
 

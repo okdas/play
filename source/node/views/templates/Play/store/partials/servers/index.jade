@@ -56,7 +56,7 @@ append dialog
                                 a.enchantment--action-rem(ng-if='ench.removable', ng-click='remEnchantment(ench, price)')
                                     i.icon-remove
                                 span(title="{{xp}}") {{price | currency:'₨'}}
-                        input.enchantment--level(type='range', min="0", max="{{levelMax}}", ng-model="ench.level", title="{{ench.level}}")
+                        input.enchantment--level(type='range', min="0", max="{{levelMax}}", ng-model="level", title="{{level}}")
 
             .row: .col-12.col-sm-12.col-lg-10.col-offset-1
                 .dialog-actions
