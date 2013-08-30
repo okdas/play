@@ -15,43 +15,19 @@ append section-body
                 }
             .item(ng-repeat='item in store.server.items', ng-controller='StoreServerItemCtrl'): .row
                 .col-12.col-sm-8.col-lg-8
-                    img.item--image(width='50', height='50', ng-src='{{item.imageUrl}}')
-                    span.item--title(ng-click='showItemDetails()')
-                        a.title {{item.titleRu}}
-                        a.subtitle ({{item.titleEn}})
+                    +ItemImage()
+                    +ItemTitle()
+                        a(href='', ng-click="showItemDetails()").title {{item.titleRu}}
+                        a(href='', ng-click="showItemDetails()").subtitle ({{item.titleEn}})
                         br
-                        span.item--details
-                            span.details--label №:
-                                strong.details--value {{item.material}}
+                        +ItemTitleDetails()
                 .col-12.col-sm-4.col-lg-4
-                    span.item--title(style='display:block; text-align:right;') {{item.price | currency:'₨'}}
-                        br
-                        span.item--details
-                            span.details--label за
-                                strong {{item.amount}} шт
-- //            table.table.items
-- //                tbody
-- //                    tr(ng-repeat='item in store.server.items', ng-controller='StoreServerItemCtrl')
-- //
-- //                        td.t-col
-- //                            img.item--image(width='32', height='32', ng-src='{{item.imageUrl}}')
-- //
-- //                        td.t-col.col-flex
-- //                            a.link-primary.item--title(ng-click='showItemDetails()') {{item.titleRu}}
-- //
-- //                        td.t-col
-- //                            b.item--price {{item.price | currency:'₨'}}
-- //
-- //                        td.t-col
-- //                            .input-group
-- //                                input.input.input-primary.item--input.item--amount(ng-model='amount', name='amount', type='text', min='1', max='99999', ng-pattern='/^[0-9]{1,5}$/', required, autocomplete='off')
-- //                                button.btn.btn-primary.item--btn(ng-click='buyItem(item)') +
-
+                    +ItemPrice()
 
 
 append dialog
     .item-dialog(ng-if="dialog.overlay", ng-controller="StoreServerItemDetailsCtrl")
-        .row: .col-12.dialog-head.info(ng-class="{'primary':'none'==orderState}")
+        .row: .col-12.dialog--head.info(ng-class="{'primary':'none'==orderState}")
             i.icon-share-alt
             span  Предмет в продаже
 
@@ -61,22 +37,13 @@ append dialog
 
         .row: .col-12.dialog-body(ng-if="'none'==orderState||'pending'==orderState")
 
-            .row: .col-12.col-sm-12.col-lg-10.col-offset-1: .item: .row
-                .col-12.col-sm-8.col-lg-8
-                    img.item--image(width='50', height='50', ng-src='{{item.imageUrl}}')
-                    span.item--title
-                        span.title {{item.titleRu}}
-                        span.subtitle ({{item.titleEn}})
-                        br
-                        span.item--details
-                            span.details--label №:
-                                strong.details--value {{item.material}}
-                .col-12.col-sm-4.col-lg-4
-                    span.item--title(style='display:block; text-align:right;') {{item.price | currency:'₨'}}
-                        br
-                        span.item--details
-                            span.details--label за
-                                strong {{item.amount}} шт
+            .row: .col-12.col-sm-12.col-lg-10.col-offset-1
+                .item(ng-controller='StoreServerItemCtrl'): .row
+                    .col-12.col-sm-8.col-lg-8
+                        +ItemImage()
+                        +ItemTitle()
+                    .col-12.col-sm-4.col-lg-4
+                        +ItemPrice()
 
             .row(ng-if="item.enchantability"): .col-12.col-sm-12.col-lg-10.col-offset-1
                 .item--enchantments Добавить чары: 
@@ -89,8 +56,45 @@ append dialog
                                 a.enchantment--action-rem(ng-if='ench.removable', ng-click='remEnchantment(ench, price)')
                                     i.icon-remove
                                 span(title="{{xp}}") {{price | currency:'₨'}}
-                        input.enchantment--level(type='range', min="0", max="{{levelMax}}", ng-model="ench.level", title="{{ench.level}}")
+                        input.enchantment--level(type='range', min="0", max="{{levelMax}}", ng-model="level", title="{{level}}")
 
             .row: .col-12.col-sm-12.col-lg-10.col-offset-1
                 .dialog-actions
                     button.btn.pull-right(ng-click='order(item)', ng-disabled="'pending'==orderState") Купить {{item.amount}} шт. за {{item.price | currency:'₨'}}
+
+
+
+mixin ItemImage
+    img.item--image(width='50', height='50', ng-src='{{item.imageUrl}}')
+
+
+mixin ItemTitle
+    span.item--title
+        if !block
+            span.title {{item.titleRu}}
+            span.subtitle ({{item.titleEn}})
+            br
+            +ItemTitleDetails()
+        else
+            block
+
+
+mixin ItemTitleDetails
+    span.item--details
+        if !block
+            span.details--label №:
+                strong.details--value {{item.material}}
+        else
+            block
+
+
+mixin ItemPrice
+    span.item--title(style='display:block; text-align:right;') {{item.price | currency:'₨'}}
+        br
+        +ItemPriceDetails()
+
+
+mixin ItemPriceDetails
+    span.item--details
+        span.details--label за
+            strong {{item.amount}} шт

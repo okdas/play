@@ -26,10 +26,10 @@ app.factory 'StoreServer', ($resource) ->
 
 
 app.factory 'StoreServerItem', ($resource) ->
-    $resource '/api/v1/store/servers/:serverId/items/:itemId/:action', {serverId:'@serverId', itemId:'@itemId'},
+    $resource '/api/v1/store/servers/:serverId/items/:itemId/:action'
+    ,   {serverId:'@serverId', itemId:'@itemId'}
+    ,
         order: {method:'POST', params:{action:'order'}}
-
-
 
 
 
@@ -214,9 +214,8 @@ app.filter 'EnchantmentLevel', () ->
         return getEnchantmentDisplayLevel ench.id, ench.level
 
 
-
 app.controller 'StoreServerItemDetailsCtrl', ($scope, $rootScope, StoreServerItem) ->
-    $scope.item= angular.copy $scope.item
+    $scope.item= new StoreServerItem angular.copy $scope.item
     $scope.itemPrice= $scope.item.price
 
     $scope.updatePrice= (price) ->
@@ -262,11 +261,6 @@ app.controller 'StoreServerItemDetailsCtrl', ($scope, $rootScope, StoreServerIte
 
 app.controller 'StoreServerItemDetailsEnchCtrl', ($scope, $rootScope) ->
 
-    $scope.ench.levelMin= $scope.ench.level or 1
-
-    $scope.levelMin= $scope.ench.level or $scope.ench.levelMin or 1
-    $scope.levelMax= $scope.ench.levelMax
-
     calcXpForLevel= (pLevel) ->
         if 17 > pLevel
             return 17 * pLevel
@@ -279,21 +273,38 @@ app.controller 'StoreServerItemDetailsEnchCtrl', ($scope, $rootScope) ->
         pLevel= Math.floor eLevel - (1 + (enchantability / 2))
         return calcXpForLevel Math.max 1, pLevel
 
-    $scope.price= 0
+    $scope.level= 0
+    $scope.levelMin= 0
+    $scope.levelMax= 127
 
-    level= 0
     $scope.xp= 0
     $scope.xpMin= 0
-    if not $scope.ench.removable
-        level= $scope.ench.level
-        $scope.xp= $scope.xpMin= calcXpForEnchantment level, 10
 
-    $scope.$watch 'ench.level', (level, o) ->
-        if level < $scope.levelMin
-            $scope.ench.level= $scope.levelMin
-            return
-        $scope.xp= (calcXpForEnchantment level, 10) - $scope.xpMin
-        $scope.price= $scope.xp * 0.03
+    $scope.price= 0
+
+    if not $scope.ench.removable
+        $scope.levelMin= $scope.ench.level
+        $scope.level= $scope.levelMin
+        $scope.xpMin= calcXpForEnchantment $scope.level, 10
+        $scope.xp= $scope.xpMin
+        #console.log 'чары входят в стоимость, levelMin: %d, xp: %d. Цена: %d', $scope.levelMin, $scope.xp, $scope.xp - $scope.xpMin
+    else
+        $scope.levelMin= $scope.ench.levelMin or 1
+        $scope.level= $scope.ench.level or $scope.levelMin
+        $scope.xp= calcXpForEnchantment $scope.level, 10
+        #console.log 'чары не входят в стоимость, levelMin: %d, level: %d, xp: %d. Цена: %d', $scope.levelMin, $scope.level, $scope.xp, $scope.xp - $scope.xpMin
+
+    $scope.levelMax= $scope.ench.levelMax
 
     $scope.$watch 'price', (newVal, oldVal) ->
         $scope.updatePrice newVal - oldVal
+
+    $scope.$watch 'level', (level, o) ->
+        if level < $scope.levelMin
+            $scope.level= $scope.levelMin
+            return
+        $scope.xp= (calcXpForEnchantment level, 10) - $scope.xpMin
+        #console.log 'обновился уровень чар: %d, разница xp: %d', level, $scope.xp
+        $scope.ench.level= $scope.level
+
+        $scope.price= $scope.xp * 0.03
