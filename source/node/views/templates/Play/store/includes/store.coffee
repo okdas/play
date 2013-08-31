@@ -1,19 +1,19 @@
 app= angular.module 'play', ['ngAnimate', 'ngRoute', 'ngResource'], ($routeProvider) ->
 
-    $routeProvider.when '/',
-        templateUrl: 'partials/', controller: 'StoreCtrl', resolve:
-            serverList: (Server) ->
-                serverList= do Server.query
-                serverList.$promise
-
-    $routeProvider.when '/servers/:serverId',
+    $routeProvider.when '/store/:server',
         templateUrl: 'partials/servers/', controller: 'StoreServerCtrl'
+
+    $routeProvider.when '/store',
+        templateUrl: 'partials/store/', controller: 'StoreCtrl'
+
+    $routeProvider.when '/store/:server',
+        templateUrl: 'partials/store/server/', controller: 'StoreServerCtrl'
 
     $routeProvider.when '/storage',
         templateUrl: 'partials/storage/', controller: 'StorageCtrl'
 
     $routeProvider.when '/storage/:server',
-        templateUrl: 'partials/storage/server/', controller: 'ServerStorageCtrl'
+        templateUrl: 'partials/storage/server/', controller: 'StorageServerCtrl'
 
 
 app.factory 'Player', ($resource) ->
@@ -22,12 +22,11 @@ app.factory 'Player', ($resource) ->
         logout: {method:'post', params:{action:'logout'}}
 
 
-app.factory 'StoreServer', ($resource) ->
-    $resource '/api/v1/store/servers/:serverId', {serverId:'@id'},
-        query: {method:'GET', isArray:true, cache:true}
+app.factory 'ServerStore', ($resource) ->
+    $resource '/api/v1/servers/:serverId/store', {serverId:'@id'},
         get: {method:'GET', cache:true, params:{serverId:'@id'}}
 
-app.factory 'StoreServerItem', ($resource) ->
+app.factory 'ServerStoreItem', ($resource) ->
     $resource '/api/v1/store/servers/:serverId/items/:itemId/:action'
     ,   {serverId:'@serverId', itemId:'@itemId'}
     ,
@@ -42,7 +41,7 @@ app.factory 'ServerStorage', ($resource) ->
     $resource '/api/v1/servers/:serverId/storage', {serverId:'@id'},
         get: {method:'GET', cache:true, params:{serverId:'@id'}}
 
-app.factory 'StorageServerItem', ($resource) ->
+app.factory 'ServerStorageItem', ($resource) ->
     $resource '/api/v1/storage/servers/:serverId/items/:itemId/:action'
     ,   {serverId:'@serverId', itemId:'@itemId'}
     ,
@@ -96,20 +95,14 @@ app.controller 'PlayerCtrl', ($scope, $route, Player) ->
 
 
 
-app.controller 'StoreCtrl', ($scope, serverList) ->
-    $scope.state= 'ready'
-    $scope.store=
-        servers: serverList
+app.controller 'StoreCtrl', ($scope, $rootScope, $q, $log) ->
+    $scope.state= null
 
-
-app.controller 'StorageCtrl', ($scope, $rootScope, $q, ServerStorage, $log) ->
     $scope.server= null
 
-    $scope.state= null
-    promise= $q.all [
-        $rootScope.player.$promise
-        $rootScope.servers.$promise
-    ]
+    promise= $q.all
+        player: $rootScope.player.$promise
+        servers: $rootScope.servers.$promise
     promise.then (resources) ->
             $log.info 'resolved', resources
             $scope.state= 'ready'
@@ -117,7 +110,22 @@ app.controller 'StorageCtrl', ($scope, $rootScope, $q, ServerStorage, $log) ->
             $scope.state= 'error'
 
 
-app.controller 'ServerStorageCtrl', ($scope, $rootScope, $routeParams, $q, ServerStorage, $log) ->
+app.controller 'StorageCtrl', ($scope, $rootScope, $q, $log) ->
+    $scope.server= null
+
+    $scope.state= null
+
+    promise= $q.all
+        player: $rootScope.player.$promise
+        servers: $rootScope.servers.$promise
+    promise.then (resources) ->
+            $log.info 'resolved', resources
+            $scope.state= 'ready'
+    ,   (error) ->
+            $scope.state= 'error'
+
+
+app.controller 'StorageServerCtrl', ($scope, $rootScope, $q, $routeParams, ServerStorage, $log) ->
     $scope.state= null
 
     $scope.storage= null
@@ -128,6 +136,7 @@ app.controller 'ServerStorageCtrl', ($scope, $rootScope, $routeParams, $q, Serve
     promise.then (resources) ->
             $log.info 'resolved', resources
             server= $rootScope.server= $rootScope.getServerByName $routeParams.server
+            console.log 'root server', server
             ServerStorage.get
                 serverId: server.id
             ,   (storage) ->
@@ -138,19 +147,23 @@ app.controller 'ServerStorageCtrl', ($scope, $rootScope, $routeParams, $q, Serve
             $scope.state= 'error'
 
 
-app.controller 'StoreServerCtrl', ($scope, $rootScope, $routeParams, $q, StoreServer, $log) ->
+app.controller 'StoreServerCtrl', ($scope, $rootScope, $q, $routeParams, ServerStore, $log) ->
     $scope.state= null
 
-    $scope.store.server= StoreServer.get $routeParams, ->
+    console.log 'store server'
 
     promise= $q.all
         player: $rootScope.player.$promise
         servers: $scope.store.servers.$promise
-        server: $scope.store.server.$promise
     promise.then (res) ->
             $log.info 'resolved', res
-            server= $rootScope.server= $rootScope.getServerByName res.server.name
-            $scope.state= 'ready'
+            server= $rootScope.server= $rootScope.getServerByName $routeParams.server
+            ServerStore.get
+                serverId: server.id
+            ,   (store) ->
+                    $log.info 'resolved store', store
+                    $scope.store= store
+                    $scope.state= 'ready'
     ,   (error) ->
             $scope.state= 'error'
 
@@ -267,8 +280,8 @@ app.filter 'EnchantmentLevel', () ->
         return getEnchantmentDisplayLevel ench.id, ench.level
 
 
-app.controller 'StoreServerItemDetailsCtrl', ($scope, $rootScope, StoreServerItem) ->
-    $scope.item= new StoreServerItem angular.copy $scope.item
+app.controller 'StoreServerItemDetailsCtrl', ($scope, $rootScope, ServerStoreItem) ->
+    $scope.item= new ServerStoreItem angular.copy $scope.item
     $scope.itemPrice= $scope.item.price
 
     $scope.updatePrice= (price) ->
@@ -302,7 +315,7 @@ app.controller 'StoreServerItemDetailsCtrl', ($scope, $rootScope, StoreServerIte
             serverId: $scope.store.server.id
             itemId: item.id
             item: item
-        StoreServerItem.order order, () ->
+        ServerStoreItem.order order, () ->
                 console.log 'получилось'
                 $scope.orderState= 'done'
         ,   () ->

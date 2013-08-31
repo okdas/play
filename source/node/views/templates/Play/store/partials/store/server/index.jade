@@ -1,19 +1,19 @@
-extends ./layout
+extends ../layout
 
 
 block section-head-title
-    a(href='#/') Добро пожаловать в магазин
+    a(href='#/store') Добро пожаловать в магазин
 
 
 append section-body
     .store--server
-        h3.store--server-title Магазин на сервере «{{store.server.title}}»
+        h3.store--server-title Магазин на сервере «{{server.title}}»
         .server--items
             style.
                 .item {
 
                 }
-            .item(ng-repeat='item in store.server.items', ng-controller='StoreServerItemCtrl'): .row
+            .item(ng-repeat='item in store.items', ng-controller='StoreServerItemCtrl'): .row
                 .col-12.col-sm-8.col-lg-8
                     +ItemImage()
                     +ItemTitle()
@@ -26,7 +26,7 @@ append section-body
 
 
 append dialog
-    .item-dialog(ng-if="dialog.overlay", ng-controller="StoreServerItemDetailsCtrl")
+    .item-dialog(ng-if="'item'==dialog.overlay", ng-controller="StoreServerItemDetailsCtrl")
         .row: .col-12.dialog--head.info(ng-class="{'primary':'none'==orderState}")
             i.icon-share-alt
             span  Предмет в продаже
@@ -47,7 +47,7 @@ append dialog
 
             .row(ng-if="item.enchantability"): .col-12.col-sm-12.col-lg-10.col-offset-1
                 .item--enchantments Добавить чары: 
-                    select.item--enchantments-select(ng-model='enchant', ng-options='e.titleRu for e in store.server.enchantments | filter:restrict(item)')
+                    select.item--enchantments-select(ng-model='enchant', ng-options='e.titleRu for e in store.enchantments | filter:restrict(item)')
                     button.item--enchantments-selected-add(ng-click='addEnchantment(enchant)') Зачаровать
                     .item--enchantment(ng-repeat='ench in item.enchantments', ng-controller='StoreServerItemDetailsEnchCtrl')
                         .enchantment--title {{ench.titleRu}} {{ench|EnchantmentLevel}}
