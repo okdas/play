@@ -710,7 +710,7 @@ app.post '/servers/:serverId(\\d+)/items/:itemId/order', access, (req, res, next
             conn.query "
                 INSERT INTO
                     ?? (
-                    playerId, serverId, material, name, titleRu, titleEn, amount
+                    playerId, serverId, material, name, titleRu, titleEn, imageUrl, amount
                 ) SELECT
                     ?,
                     ?,
@@ -718,6 +718,7 @@ app.post '/servers/:serverId(\\d+)/items/:itemId/order', access, (req, res, next
                     name,
                     titleRu,
                     titleEn,
+                    imageUrl,
                     ?
                 FROM
                     ?? as Item

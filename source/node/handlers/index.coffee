@@ -61,6 +61,11 @@ app.on 'mount', (parent) ->
     app.use '/api/v1/store'
     ,   require './Play/Api/V1/Store'
 
+    ###
+    Методы API для работы с серверами.
+    ###
+    app.use '/api/v1/servers'
+    ,   require './Play/Api/V1/Servers'
 
     ###
     Методы для обработки платежей игрока.

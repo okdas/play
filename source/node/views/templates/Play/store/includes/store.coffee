@@ -2,15 +2,18 @@ app= angular.module 'play', ['ngAnimate', 'ngRoute', 'ngResource'], ($routeProvi
 
     $routeProvider.when '/',
         templateUrl: 'partials/', controller: 'StoreCtrl', resolve:
-            serverList: (StoreServer) ->
-                serverList= do StoreServer.query
+            serverList: (Server) ->
+                serverList= do Server.query
                 serverList.$promise
 
     $routeProvider.when '/servers/:serverId',
         templateUrl: 'partials/servers/', controller: 'StoreServerCtrl'
 
+    $routeProvider.when '/storage',
+        templateUrl: 'partials/storage/', controller: 'StorageCtrl'
 
-
+    $routeProvider.when '/storage/:server',
+        templateUrl: 'partials/storage/server/', controller: 'ServerStorageCtrl'
 
 
 app.factory 'Player', ($resource) ->
@@ -24,7 +27,6 @@ app.factory 'StoreServer', ($resource) ->
         query: {method:'GET', isArray:true, cache:true}
         get: {method:'GET', cache:true, params:{serverId:'@id'}}
 
-
 app.factory 'StoreServerItem', ($resource) ->
     $resource '/api/v1/store/servers/:serverId/items/:itemId/:action'
     ,   {serverId:'@serverId', itemId:'@itemId'}
@@ -32,18 +34,39 @@ app.factory 'StoreServerItem', ($resource) ->
         order: {method:'POST', params:{action:'order'}}
 
 
+app.factory 'Server', ($resource) ->
+    $resource '/api/v1/servers/:serverId', {serverId:'@id'},
+        query: {method:'GET', cache:true, isArray:true}
 
-app.controller 'ViewCtrl', ($scope, $rootScope, $location, $window, Player, StoreServer, $log) ->
+app.factory 'ServerStorage', ($resource) ->
+    $resource '/api/v1/servers/:serverId/storage', {serverId:'@id'},
+        get: {method:'GET', cache:true, params:{serverId:'@id'}}
+
+app.factory 'StorageServerItem', ($resource) ->
+    $resource '/api/v1/storage/servers/:serverId/items/:itemId/:action'
+    ,   {serverId:'@serverId', itemId:'@itemId'}
+    ,
+        order: {method:'POST', params:{action:'order'}}
+
+
+app.controller 'ViewCtrl', ($scope, $rootScope, $location, $window, Player, Server, $log) ->
 
     $rootScope.player= Player.get () ->
+        $log.info 'игрок получен'
 
     $rootScope.logout= () ->
         $rootScope.player.$logout () ->
             $window.location.href= '/'
 
+    $rootScope.servers= Server.query ->
+        $log.info 'список серверов получен'
+
+    $rootScope.getServerByName= (name) ->
+        for server in $rootScope.servers
+            return server if server.name == name
 
     $rootScope.store=
-        servers: StoreServer.query ->
+        servers: Server.query ->
             $log.info 'список серверов получен'
 
 
@@ -79,7 +102,40 @@ app.controller 'StoreCtrl', ($scope, serverList) ->
         servers: serverList
 
 
+app.controller 'StorageCtrl', ($scope, $rootScope, $q, ServerStorage, $log) ->
+    $scope.server= null
 
+    $scope.state= null
+    promise= $q.all [
+        $rootScope.player.$promise
+        $rootScope.servers.$promise
+    ]
+    promise.then (resources) ->
+            $log.info 'resolved', resources
+            $scope.state= 'ready'
+    ,   (error) ->
+            $scope.state= 'error'
+
+
+app.controller 'ServerStorageCtrl', ($scope, $rootScope, $routeParams, $q, ServerStorage, $log) ->
+    $scope.state= null
+
+    $scope.storage= null
+
+    promise= $q.all
+        player: $rootScope.player.$promise
+        servers: $rootScope.servers.$promise
+    promise.then (resources) ->
+            $log.info 'resolved', resources
+            server= $rootScope.server= $rootScope.getServerByName $routeParams.server
+            ServerStorage.get
+                serverId: server.id
+            ,   (storage) ->
+                    $log.info 'resolved storage', storage
+                    $scope.storage= $rootScope.server.storage= storage
+                    $scope.state= 'ready'
+    ,   (error) ->
+            $scope.state= 'error'
 
 
 app.controller 'StoreServerCtrl', ($scope, $rootScope, $routeParams, $q, StoreServer, $log) ->
@@ -87,17 +143,14 @@ app.controller 'StoreServerCtrl', ($scope, $rootScope, $routeParams, $q, StoreSe
 
     $scope.store.server= StoreServer.get $routeParams, ->
 
-    promise= $q.all [
-        $rootScope.player.$promise
-        $scope.store.servers.$promise
-        $scope.store.server.$promise
-    ]
-    promise.then (resources) ->
+    promise= $q.all
+        player: $rootScope.player.$promise
+        servers: $scope.store.servers.$promise
+        server: $scope.store.server.$promise
+    promise.then (res) ->
+            $log.info 'resolved', res
+            server= $rootScope.server= $rootScope.getServerByName res.server.name
             $scope.state= 'ready'
-            for server in $scope.store.servers
-                if server.id == $scope.store.server.id
-                    $scope.cart= server
-                    $scope.cart.items= [] if not $scope.cart.items
     ,   (error) ->
             $scope.state= 'error'
 
