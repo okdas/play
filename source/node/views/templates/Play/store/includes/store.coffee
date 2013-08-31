@@ -310,9 +310,10 @@ app.controller 'StoreServerItemDetailsCtrl', ($scope, $rootScope, ServerStoreIte
 
     $scope.orderState= 'none'
     $scope.order= (item) ->
+        console.log 'order', item
         $scope.orderState= 'pending'
         order=
-            serverId: $scope.store.server.id
+            serverId: $scope.server.id
             itemId: item.id
             item: item
         ServerStoreItem.order order, () ->
