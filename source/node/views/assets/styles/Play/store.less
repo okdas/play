@@ -38,6 +38,9 @@
 
 .item {
     display: block;
+    margin-bottom: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
     text-align: left;
     white-space: nowrap;
 }
@@ -54,19 +57,32 @@
     box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
 }
 .item--title {
-    -padding: 5px 0 0 15px;
+    padding: 5px 0 0;
     vertical-align: top;
     text-align: left;
-    font-size: 21px;
+    font-size: 18px;
     font-weight: 400;
-}
-.item--subtitle {
-    font-size: 14px;
-}
-.subtitle {
-    opacity:.5;
+    .title {
+
+    }
+    .subtitle {
+        opacity:.5;
+    }
 }
 
+.item--details {
+    font-size: 14px;
+    .details--label {
+        font-weight: 400;
+    }
+    .details--value {
+    }
+}
+
+.item--enchantments {
+    padding-top: 15px;
+    border-top: 1px solid #EEE;
+}
 .item--enchantment {
     margin-top: 15px;
     font-size: 18px;
@@ -86,4 +102,51 @@
     padding-right: 5px;
     font-size: 14px;
     text-decoration:none !important;
+}
+
+.dialog-head {
+    font-size: 14px;
+}
+
+.dialog-head.info,
+.dialog-head-info {
+    background: #563D7C;
+    color: #EEE;
+    //transition: all 0.7s ease;
+}
+
+.dialog-head.primary,
+.dialog-head-primary {
+    background: #277AC1;
+    color: #EEE;
+    //transition: all 0.3s ease;
+}
+
+.view.ng-enter,
+.view.ng-leave {
+    transition: all .7s ease;
+}
+
+.dialog-body.ng-enter,
+.dialog-body.ng-leave.ng-leave-active {
+    opacity: 0;
+}
+
+.dialog-body.ng-leave,
+.dialog-body.ng-enter.ng-enter-active {
+    opacity: 1;
+}
+
+.dialog-actions {
+    padding-top: 50px;
+    border-top: 1px solid #EEE;
+}
+
+.btn {
+    background: #277AC1;
+    background-image: none;
+}
+
+.item-dialog {
+
 }

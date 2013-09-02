@@ -1,16 +1,19 @@
 app= angular.module 'play', ['ngAnimate', 'ngRoute', 'ngResource'], ($routeProvider) ->
 
-    $routeProvider.when '/',
-        templateUrl: 'partials/', controller: 'StoreCtrl', resolve:
-            serverList: (StoreServer) ->
-                serverList= do StoreServer.query
-                serverList.$promise
-
-    $routeProvider.when '/servers/:serverId',
+    $routeProvider.when '/store/:server',
         templateUrl: 'partials/servers/', controller: 'StoreServerCtrl'
 
+    $routeProvider.when '/store',
+        templateUrl: 'partials/store/', controller: 'StoreCtrl'
 
+    $routeProvider.when '/store/:server',
+        templateUrl: 'partials/store/server/', controller: 'StoreServerCtrl'
 
+    $routeProvider.when '/storage',
+        templateUrl: 'partials/storage/', controller: 'StorageCtrl'
+
+    $routeProvider.when '/storage/:server',
+        templateUrl: 'partials/storage/server/', controller: 'StorageServerCtrl'
 
 
 app.factory 'Player', ($resource) ->
@@ -19,31 +22,50 @@ app.factory 'Player', ($resource) ->
         logout: {method:'post', params:{action:'logout'}}
 
 
-app.factory 'StoreServer', ($resource) ->
-    $resource '/api/v1/store/servers/:serverId', {serverId:'@id'},
-        query: {method:'GET', isArray:true, cache:true}
+app.factory 'ServerStore', ($resource) ->
+    $resource '/api/v1/servers/:serverId/store', {serverId:'@id'},
         get: {method:'GET', cache:true, params:{serverId:'@id'}}
 
-
-app.factory 'StoreServerItem', ($resource) ->
-    $resource '/api/v1/store/servers/:serverId/items/:itemId/:action', {serverId:'@serverId', itemId:'@itemId'},
+app.factory 'ServerStoreItem', ($resource) ->
+    $resource '/api/v1/store/servers/:serverId/items/:itemId/:action'
+    ,   {serverId:'@serverId', itemId:'@itemId'}
+    ,
         order: {method:'POST', params:{action:'order'}}
 
 
+app.factory 'Server', ($resource) ->
+    $resource '/api/v1/servers/:serverId', {serverId:'@id'},
+        query: {method:'GET', cache:true, isArray:true}
+
+app.factory 'ServerStorage', ($resource) ->
+    $resource '/api/v1/servers/:serverId/storage', {serverId:'@id'},
+        get: {method:'GET', cache:true, params:{serverId:'@id'}}
+
+app.factory 'ServerStorageItem', ($resource) ->
+    $resource '/api/v1/storage/servers/:serverId/items/:itemId/:action'
+    ,   {serverId:'@serverId', itemId:'@itemId'}
+    ,
+        order: {method:'POST', params:{action:'order'}}
 
 
-
-app.controller 'ViewCtrl', ($scope, $rootScope, $location, $window, Player, StoreServer, $log) ->
+app.controller 'ViewCtrl', ($scope, $rootScope, $location, $window, Player, Server, $log) ->
 
     $rootScope.player= Player.get () ->
+        $log.info 'игрок получен'
 
     $rootScope.logout= () ->
         $rootScope.player.$logout () ->
             $window.location.href= '/'
 
+    $rootScope.servers= Server.query ->
+        $log.info 'список серверов получен'
+
+    $rootScope.getServerByName= (name) ->
+        for server in $rootScope.servers
+            return server if server.name == name
 
     $rootScope.store=
-        servers: StoreServer.query ->
+        servers: Server.query ->
             $log.info 'список серверов получен'
 
 
@@ -73,65 +95,83 @@ app.controller 'PlayerCtrl', ($scope, $route, Player) ->
 
 
 
-app.controller 'StoreCtrl', ($scope, serverList) ->
-    $scope.state= 'ready'
-    $scope.store=
-        servers: serverList
-
-
-
-
-
-app.controller 'StoreServerCtrl', ($scope, $rootScope, $routeParams, $q, StoreServer, StoreServerItem, $log) ->
+app.controller 'StoreCtrl', ($scope, $rootScope, $q, $log) ->
     $scope.state= null
 
-    $scope.store.server= StoreServer.get $routeParams, ->
+    $scope.server= null
 
-    promise= $q.all [
-        $rootScope.player.$promise
-        $scope.store.servers.$promise
-        $scope.store.server.$promise
-    ]
+    promise= $q.all
+        player: $rootScope.player.$promise
+        servers: $rootScope.servers.$promise
     promise.then (resources) ->
+            $log.info 'resolved', resources
             $scope.state= 'ready'
-            for server in $scope.store.servers
-                if server.id == $scope.store.server.id
-                    $scope.cart= server
-                    $scope.cart.items= [] if not $scope.cart.items
     ,   (error) ->
             $scope.state= 'error'
 
 
-    $scope.order= (item) ->
-        $log.info 'купить предмет', item
-        StoreServerItem.order
-            serverId: $scope.store.server.id
-            itemId: item.id
-            item: item
+app.controller 'StorageCtrl', ($scope, $rootScope, $q, $log) ->
+    $scope.server= null
+
+    $scope.state= null
+
+    promise= $q.all
+        player: $rootScope.player.$promise
+        servers: $rootScope.servers.$promise
+    promise.then (resources) ->
+            $log.info 'resolved', resources
+            $scope.state= 'ready'
+    ,   (error) ->
+            $scope.state= 'error'
+
+
+app.controller 'StorageServerCtrl', ($scope, $rootScope, $q, $routeParams, ServerStorage, $log) ->
+    $scope.state= null
+
+    $scope.storage= null
+
+    promise= $q.all
+        player: $rootScope.player.$promise
+        servers: $rootScope.servers.$promise
+    promise.then (resources) ->
+            $log.info 'resolved', resources
+            server= $rootScope.server= $rootScope.getServerByName $routeParams.server
+            console.log 'root server', server
+            ServerStorage.get
+                serverId: server.id
+            ,   (storage) ->
+                    $log.info 'resolved storage', storage
+                    $scope.storage= $rootScope.server.storage= storage
+                    $scope.state= 'ready'
+    ,   (error) ->
+            $scope.state= 'error'
+
+
+app.controller 'StoreServerCtrl', ($scope, $rootScope, $q, $routeParams, ServerStore, $log) ->
+    $scope.state= null
+
+    console.log 'store server'
+
+    promise= $q.all
+        player: $rootScope.player.$promise
+        servers: $scope.store.servers.$promise
+    promise.then (res) ->
+            $log.info 'resolved', res
+            server= $rootScope.server= $rootScope.getServerByName $routeParams.server
+            ServerStore.get
+                serverId: server.id
+            ,   (store) ->
+                    $log.info 'resolved store', store
+                    $scope.store= store
+                    $scope.state= 'ready'
+    ,   (error) ->
+            $scope.state= 'error'
 
 
 
 
 
 app.controller 'StoreServerItemCtrl', ($scope, $rootScope) ->
-    $scope.amount= 1
-
-    $scope.buyItem= (item) =>
-        return if not $scope.amount
-
-        found= null
-        for itm in $scope.cart.items
-            if not found and itm.id == item.id
-                found= itm
-
-        if not found
-            found= angular.copy item
-            found.amount= 0
-            $scope.cart.items.push found
-
-        amount= (found.amount|0) + ($scope.amount|0)
-        found.amount= if amount > 99999 then 99999 else amount
-        #$scope.amount= 1
 
     $scope.showItemDetails= () ->
         $rootScope.item= $scope.item
@@ -240,9 +280,8 @@ app.filter 'EnchantmentLevel', () ->
         return getEnchantmentDisplayLevel ench.id, ench.level
 
 
-
-app.controller 'StoreServerItemDetailsCtrl', ($scope, $rootScope) ->
-    $scope.item= angular.copy $scope.item
+app.controller 'StoreServerItemDetailsCtrl', ($scope, $rootScope, ServerStoreItem) ->
+    $scope.item= new ServerStoreItem angular.copy $scope.item
     $scope.itemPrice= $scope.item.price
 
     $scope.updatePrice= (price) ->
@@ -269,16 +308,25 @@ app.controller 'StoreServerItemDetailsCtrl', ($scope, $rootScope) ->
             $scope.item.enchantments.splice i, 1
             $scope.updatePrice 0 - price
 
+    $scope.orderState= 'none'
+    $scope.order= (item) ->
+        console.log 'order', item
+        $scope.orderState= 'pending'
+        order=
+            serverId: $scope.server.id
+            itemId: item.id
+            item: item
+        ServerStoreItem.order order, () ->
+                console.log 'получилось'
+                $scope.orderState= 'done'
+        ,   () ->
+                console.log 'не получилось'
+                $scope.orderState= 'fail'
 
 
 
 
 app.controller 'StoreServerItemDetailsEnchCtrl', ($scope, $rootScope) ->
-
-    $scope.ench.levelMin= $scope.ench.level or 1
-
-    $scope.levelMin= $scope.ench.level or $scope.ench.levelMin or 1
-    $scope.levelMax= $scope.ench.levelMax
 
     calcXpForLevel= (pLevel) ->
         if 17 > pLevel
@@ -292,21 +340,38 @@ app.controller 'StoreServerItemDetailsEnchCtrl', ($scope, $rootScope) ->
         pLevel= Math.floor eLevel - (1 + (enchantability / 2))
         return calcXpForLevel Math.max 1, pLevel
 
-    $scope.price= 0
+    $scope.level= 0
+    $scope.levelMin= 0
+    $scope.levelMax= 127
 
-    level= 0
     $scope.xp= 0
     $scope.xpMin= 0
-    if not $scope.ench.removable
-        level= $scope.ench.level
-        $scope.xp= $scope.xpMin= calcXpForEnchantment level, 10
 
-    $scope.$watch 'ench.level', (level, o) ->
-        if level < $scope.levelMin
-            $scope.ench.level= $scope.levelMin
-            return
-        $scope.xp= (calcXpForEnchantment level, 10) - $scope.xpMin
-        $scope.price= $scope.xp * 0.03
+    $scope.price= 0
+
+    if not $scope.ench.removable
+        $scope.levelMin= $scope.ench.level
+        $scope.level= $scope.levelMin
+        $scope.xpMin= calcXpForEnchantment $scope.level, 10
+        $scope.xp= $scope.xpMin
+        #console.log 'чары входят в стоимость, levelMin: %d, xp: %d. Цена: %d', $scope.levelMin, $scope.xp, $scope.xp - $scope.xpMin
+    else
+        $scope.levelMin= $scope.ench.levelMin or 1
+        $scope.level= $scope.ench.level or $scope.levelMin
+        $scope.xp= calcXpForEnchantment $scope.level, 10
+        #console.log 'чары не входят в стоимость, levelMin: %d, level: %d, xp: %d. Цена: %d', $scope.levelMin, $scope.level, $scope.xp, $scope.xp - $scope.xpMin
+
+    $scope.levelMax= $scope.ench.levelMax
 
     $scope.$watch 'price', (newVal, oldVal) ->
         $scope.updatePrice newVal - oldVal
+
+    $scope.$watch 'level', (level, o) ->
+        if level < $scope.levelMin
+            $scope.level= $scope.levelMin
+            return
+        $scope.xp= (calcXpForEnchantment level, 10) - $scope.xpMin
+        #console.log 'обновился уровень чар: %d, разница xp: %d', level, $scope.xp
+        $scope.ench.level= $scope.level
+
+        $scope.price= $scope.xp * 0.03

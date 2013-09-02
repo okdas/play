@@ -349,19 +349,42 @@ table {
     position:fixed; top:0; right:0; bottom:0; left:0; z-index:9999;
     overflow-x:hidden; overflow-y:hidden;
     padding-top:40px;
+
+    &--head {
+        padding: 15px;
+        line-height: 20px;
+
+        background:#eee;
+        font-size: 14px;
+        color: #777;
+
+        &-info, &.info, {
+            background: #563D7C;
+            color: #eee;
+        }
+
+        &-primary, &.primary, {
+            background: #277AC1;
+            color: #eee;
+        }
+
+    }
+    &--progress {
+        height: 2px;
+        margin: 0;
+        border-radius: 0;
+        .box-shadow(none);
+        &-bar {
+            background-color: #2778BE;
+            .box-shadow(none);
+        }
+    }
 }
     .dialog-bg {
         position:absolute; top:0; right:0; bottom:0; left:0;
     }
     .dialog-container {
         box-shadow:0 2px 2px -2px rgba(0,0,0,.3);
-    }
-    .dialog-head {
-        padding:15px;
-        line-height:20px;
-        background:#eee;
-        font-size:18px;
-        color:#777;
     }
     .dialog-body {
         padding:50px;

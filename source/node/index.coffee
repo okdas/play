@@ -73,6 +73,37 @@ module.exports= (cfg, log, done) ->
 
         app.db= maria.createPool config.db
 
+        app.set 'maria', maria= () ->
+            (req, res, next) ->
+                req.maria= null
+
+                console.log 'maria...'
+
+                req.db.getConnection (err, conn) ->
+                    if not err
+                        req.maria= conn
+
+                        req.on 'end', () ->
+                            if req.maria
+                                req.maria.end () ->
+                                    console.log 'request end', arguments
+
+                        console.log 'maria.'
+
+                        conn.on 'error', () ->
+                            console.log 'error connection', arguments
+
+                    next err
+
+        maria.Server= require './models/Server'
+        maria.Server.Storage= require './models/Server/Storage'
+        maria.Server.Storage.Item= require './models/Server/Storage/Item'
+        maria.Server.Store= require './models/Server/Store'
+        maria.Server.Store.Enchantment= require './models/Server/Store/Enchantment'
+        maria.Server.Store.Item= require './models/Server/Store/Item'
+        maria.Server.Store.Item.Enchantment= require './models/Server/Store/Item/Enchantment'
+
+
         app.use (req, res, next) ->
             req.db= app.db
             return do next
@@ -82,9 +113,4 @@ module.exports= (cfg, log, done) ->
     Обработчики маршрутов приложения
     ###
     app.configure ->
-        config= app.get 'config'
-
-        handlers= require './handlers'
-
-        app.use App.vhost "play.#{config.host}", handlers.play app
-        app.use App.vhost "manage.#{config.host}", handlers.manage app
+        app.use require './handlers'

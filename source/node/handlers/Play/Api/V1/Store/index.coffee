@@ -1,6 +1,10 @@
 express= require 'express'
 async= require 'async'
 
+extend= require 'extend'
+deferred= require 'deferred'
+
+
 access= (req, res, next) ->
     return next 401 if do req.isUnauthenticated
     return do next
@@ -13,6 +17,7 @@ class Item
         @titleRu= data.itemTitleRu
         @titleEn= data.itemTitleEn
         @price= data.itemPrice
+        @amount= data.itemAmount
         @material= data.itemMaterial
         @imageUrl= data.itemImageUrl
         @enchantability= data.itemEnchantability
@@ -55,108 +60,6 @@ calcXpForEnchantment= (eLevel, enchantability) ->
 Методы API для работы c магазином.
 ###
 app= module.exports= do express
-
-
-
-###
-Отдает магазин аутентифицированному игроку.
-###
-app.get '/', access, (req, res, next) ->
-    async.waterfall [
-
-        (done) ->
-            req.db.getConnection (err, conn) ->
-                return done err, conn
-
-        (conn, done) ->
-            # Извлечь все предметы магазина
-            conn.query "
-                SELECT
-                    item.id as itemId,
-                    item.title as itemTitle,
-                    item.price as itemPrice,
-                    server.id as serverId,
-                    server.name as serverName,
-                    server.title as serverTitle
-                FROM ?? as Item
-                LEFT OUTER JOIN store_item_servers as itemServers
-                    ON itemServers.itemId = item.id
-                JOIN server as server
-                    ON server.id= itemServers.serverId
-                "
-            ,   ['item']
-            ,   (err, rows) ->
-                    return done err, conn, rows
-
-        (conn, rows, done) ->
-            servers= []
-            serversIndex= {}
-            serversItemsIndex= {}
-            for row in rows
-                server= serversIndex[row.serverId]
-                if not server
-                    server= serversIndex[row.serverId]=
-                        id: row.serverId
-                        name: row.serverName
-                        title: row.serverTitle
-                        store:
-                            items: []
-                        storage:
-                            items: []
-                    servers.push server
-                    serversItemsIndex[row.serverId]= {}
-                item= serversItemsIndex[row.serverId][row.itemId]
-                if not item
-                    item= serversItemsIndex[row.serverId][row.itemId]=
-                        id: row.itemId
-                        title: row.itemTitle
-                        price: row.itemPrice
-                    server.store.items.push item
-            return done null, conn, servers
-
-    ],  (err, conn, servers) ->
-            do conn.end if conn
-
-            return next err if err
-            return res.json 200,
-                servers: servers
-
-
-
-###
-Отдает список серверов аутентифицированному игроку.
-###
-app.get '/servers', access, (req, res, next) ->
-
-    servers= []
-
-    async.waterfall [
-
-        (done) ->
-            req.db.getConnection (err, conn) ->
-                return done err, conn
-
-        (conn, done) ->
-            # Извлечь все предметы магазина
-            conn.query "
-                SELECT
-                    Server.id,
-                    Server.name,
-                    Server.title
-
-                FROM
-                    ?? as Server
-                "
-            ,   ['server']
-            ,   (err, rows) ->
-                    servers= rows if not err
-                    return done err, conn
-
-    ],  (err, conn) ->
-            do conn.end if conn
-
-            return next err if err
-            return res.json 200, servers
 
 
 
@@ -271,8 +174,8 @@ app.post '/servers/:serverId(\\d+)/items/:itemId/order', access, (req, res, next
             conn.query "
                 SELECT
                     Enchantment.id,
-                    Enchantment.levelmax as levelMax,
-                    1 as levelMin
+                    Enchantment.levelMax,
+                    Enchantment.levelMin
                 FROM
                     ?? as Enchantment
                 WHERE
@@ -365,7 +268,7 @@ app.post '/servers/:serverId(\\d+)/items/:itemId/order', access, (req, res, next
             conn.query "
                 INSERT INTO
                     ?? (
-                    playerId, serverId, material, name, titleRu, titleEn, amount
+                    playerId, serverId, material, name, titleRu, titleEn, imageUrl, amount
                 ) SELECT
                     ?,
                     ?,
@@ -373,6 +276,7 @@ app.post '/servers/:serverId(\\d+)/items/:itemId/order', access, (req, res, next
                     name,
                     titleRu,
                     titleEn,
+                    imageUrl,
                     ?
                 FROM
                     ?? as Item
@@ -436,110 +340,3 @@ app.post '/servers/:serverId(\\d+)/items/:itemId/order', access, (req, res, next
 
                     return next err if err
                     return res.json 201, item
-
-
-###
-Отдает магазин сервера аутентифицированному игроку.
-###
-app.get '/servers/:serverName', access, (req, res, next) ->
-
-    serverName= req.params.serverName
-    server= null
-
-    async.waterfall [
-
-        (done) ->
-            req.db.getConnection (err, conn) ->
-                return done err, conn
-
-        (conn, done) ->
-            conn.query "
-                SELECT
-                    Server.id,
-                    Server.name,
-                    Server.title
-
-                FROM
-                    ?? as Server
-
-                WHERE
-                    Server.name = ?
-                "
-            ,   ['server', serverName]
-            ,   (err, rows) ->
-                    server= do rows.shift if not err and rows.length
-                    return done err, conn
-
-        (conn, done) ->
-            conn.query "
-                SELECT
-                    ServerEnchantment.id,
-                    ServerEnchantment.titleRu,
-                    ServerEnchantment.titleEn,
-                    ServerEnchantment.levelMin,
-                    ServerEnchantment.levelMax
-                FROM
-                    ?? as ServerEnchantment
-                "
-            ,   ['bukkit_enchantment']
-            ,   (err, rows) ->
-                    server.enchantments= rows if not err
-                    return done err, conn
-
-        (conn, done) ->
-            return done null, conn if not server
-            conn.query "
-                SELECT
-                    *,
-                    Item.id as itemId,
-                    Item.name as itemName,
-                    Item.titleRu as itemTitleRu,
-                    Item.titleEn as itemTitleEn,
-                    Item.price as itemPrice,
-                    Material.id as itemMaterial,
-                    Material.imageUrl as itemImageUrl,
-                    Material.enchantability as itemEnchantability,
-                    Enchantment.id as enchantmentId,
-                    Enchantment.titleRu as enchantmentTitleRu,
-                    Enchantment.titleEn as enchantmentTitleEn,
-                    Enchantment.levelMin as enchantmentLevelMin,
-                    Enchantment.levelMax as enchantmentLevelMax,
-                    ItemEnchantment.level as enchantmentLevel,
-                    ItemEnchantment.order as enchantmentOrder
-                FROM
-                    ?? as ServerItem
-                JOIN
-                    ?? as Item
-                    ON Item.id = ServerItem.itemId
-                JOIN
-                    ?? as Material
-                    ON Material.id = Item.material
-                LEFT OUTER JOIN
-                    ?? as ItemEnchantment
-                    ON ItemEnchantment.itemId = Item.id AND Material.enchantability IS NOT NULL
-                LEFT OUTER JOIN
-                    ?? as Enchantment
-                    ON Enchantment.id = ItemEnchantment.enchantmentId
-                WHERE
-                    ServerItem.serverId = ?
-                "
-            ,   ['server_item', 'item', 'bukkit_material', 'item_enchantment', 'bukkit_enchantment', server.id]
-            ,   (err, rows) ->
-                    server.items= []
-                    if not err
-                        itemIds= {}
-                        for row in rows
-                            item= itemIds[row.itemId]
-                            if not item
-                                server.items.push item= itemIds[row.itemId]= new Item row
-                            if item.enchantability and row.enchantmentId
-                                item.enchantments= [] if not item.enchantments
-                                item.enchantments.push new Enchantment row
-                    return done err, conn
-
-    ],  (err, conn) ->
-            do conn.end if conn
-
-            return next err if err
-            return res.json 404, server if not server
-            return res.json 200, server
