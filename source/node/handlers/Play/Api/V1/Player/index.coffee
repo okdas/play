@@ -18,6 +18,9 @@ app= module.exports= do express
 
 
 
+###
+Создает игрока
+###
 app.post '/players', access, (req, res, next) ->
     ###
     {
@@ -46,7 +49,7 @@ app.post '/players', access, (req, res, next) ->
             ,   (err, resp) ->
                     if resp.affectedRows != 1
                         err= 'fail'
-                    
+
                     return done err, conn
 
         (conn, done) ->
@@ -148,7 +151,7 @@ app.put '/', access, (req, res, next) ->
             ,   (err, resp) ->
                     if resp.affectedRows != 1
                         err= 'fail'
-                    
+
                     return done err, conn
 
         (conn, done) ->
