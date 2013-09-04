@@ -26,14 +26,21 @@ app.on 'mount', (parent) ->
     app.use do passport.session
 
 
+    app.enable 'strict routing'
+
     app.get '/', (req, res, next) ->
         return res.redirect '/welcome/' if do req.isUnauthenticated
         return do next
+
     app.use '/', App.static "#{__dirname}/../views/templates/Play"
 
     app.get '/welcome', (req, res, next) ->
+        return res.redirect '/welcome/'
+
+    app.get '/welcome/', (req, res, next) ->
         return res.redirect '/' if do req.isAuthenticated
         return do next
+
     app.use '/welcome', App.static "#{__dirname}/../views/templates/Welcome"
 
 
