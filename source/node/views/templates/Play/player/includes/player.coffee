@@ -15,6 +15,11 @@ app= angular.module 'play', ['ngAnimate', 'ngRoute', 'ngResource'], ($routeProvi
         templateUrl: 'partials/payments/payment/', controller:'PlayerPaymentCtrl'
 
 
+    #$routeProvider.when '/payments/:paymentId',
+    #    templateUrl: 'partials/payments/payment/', controller:'PlayerPaymentCtrl'
+
+
+
 app.factory '$cache', ($cacheFactory) ->
     $cacheFactory 'play'
 

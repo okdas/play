@@ -1,0 +1,19 @@
+.row: .col-12.dialog-head
+    i.icon-signin
+    span  Контрольно-пропускной пункт
+
+.row: .col-12.dialog-body
+
+    .row: .col-8.col-offset-2
+        h2.dialog-title Представьтесь, пожалуйста
+
+    .row: .col-8.col-offset-2
+
+        form.form-large(name='loginForm', ng-controller='LoginDialogCtrl').dialog-form
+            input.input(type='text', name='username', placeholder='Пользователь', required, ng-model='player.name')
+            input.input(type='password', name='password', placeholder='Пароль', required, ng-model='player.pass')
+
+            .form-actions
+                button.btn.btn-primary(type='submit', ng-click='login(player)', ng-disabled='!loginForm.$valid')
+                    i.icon-signin
+                    span  Представиться

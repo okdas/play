@@ -3,6 +3,11 @@ app= angular.module 'play', ['ngResource', 'ngRoute'], ($routeProvider) ->
     $routeProvider.when '/',
         templateUrl: 'partials/login/', controller: 'LoginCtrl'
 
+    $routeProvider.when '/registeration',
+        templateUrl: 'partials/registeration/', controller: 'RegisterationCtrl'
+
+
+
 
 app.factory 'Player', ($resource) ->
     $resource '/api/v1/player/:action', {},
@@ -21,6 +26,11 @@ app.controller 'ViewCtrl', ($scope, $location, Player) ->
 
         $scope.hideDialog= () ->
             $scope.dialog.overlay= null
+
+
+
+app.controller 'RegisterationCtrl', ($scope) ->
+    $scope.state= 'loaded'
 
 
 app.controller 'LoginCtrl', ($scope) ->
