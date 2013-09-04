@@ -77,8 +77,9 @@
 
 
 body {
-    font-size:14px; line-height:1.5em;
-    -webkit-backface-visibility:hidden;
+    font-size: 14px; line-height: 1.5em;
+    color: #444;
+    -webkit-backface-visibility: hidden;
 }
 
 form {
@@ -162,14 +163,20 @@ select {
 }
 
 
+.navbar-inverse {
+    .navbar-brand, 
+    .navbar-nav > li > a {
+        color: #ccc;
+    }
+}
 
 .navbar-brand, .section-head-title {
-    font-size:18px; font-weight:500; line-height:20px;
-    text-transform:uppercase; letter-spacing:2px;
-    color:#777;
+    font-size: 18px; font-weight: 500; line-height: 20px;
+    text-transform: uppercase; letter-spacing: 2px;
+    white-space: nowrap;
 }
 .navbar-brand sup {
-    font-size:small;
+    font-size: small;
     opacity:.5;
 }
 
@@ -214,7 +221,7 @@ abbr {
 }   .nav-row > li {
         display:inline-block;
         line-height:20px;
-    }   .nav-row > li > a {
+    }   .nav-row > li > a, .nav-row > li > b {
             padding:0 15px; line-height:20px;
             background:none !important;
         }   .nav-row > li > a:hover {
@@ -379,21 +386,21 @@ table {
             .box-shadow(none);
         }
     }
+    &--body {
+        padding: 50px;
+        background: #f9f9f9;
+    }
+    &--title {
+        margin-bottom: 20px;
+        font-size: 1.5em; line-height: 1.5em;
+        text-align: center;
+    }
 }
     .dialog-bg {
         position:absolute; top:0; right:0; bottom:0; left:0;
     }
     .dialog-container {
         box-shadow:0 2px 2px -2px rgba(0,0,0,.3);
-    }
-    .dialog-body {
-        padding:50px;
-        background:#f9f9f9;
-    }
-    .dialog-title {
-        margin-bottom:20px;
-        font-size:1.5em; line-height:1.5em;
-        text-align:center;
     }
 
 .dialog-overlay {
@@ -535,4 +542,10 @@ html {
     .hidden-inline-lg {
         display: none;
     }
+}
+
+
+.navbar-nav.pull-right,
+.section-head-nav.pull-right {
+    margin-right: -15px;
 }
