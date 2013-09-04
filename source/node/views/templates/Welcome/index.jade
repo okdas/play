@@ -1,10 +1,6 @@
 extends ./layout
 
 
-append head-scripts
-
-    include includes/login.coffee
-
 
 append header
 
@@ -15,9 +11,5 @@ append header
             .nav-collapse.collapse
                 ul.nav.navbar-nav
                 ul.nav.navbar-nav.pull-right
-                    li: a(href='', ng-click='showDialog()') Контрольно-пропускной пункт
-
-
-append view-outer
-
-    script(type='text/ng-template', id='partials/'): include partials/login/index
+                    li: a(href='', ng-click="showLoginDialog()") Вход
+                    li: a(href='#/registration') Регистрация

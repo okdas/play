@@ -1,29 +1,9 @@
-!!!
-html(lang='ru', ng-app='play', ng-cloak)
+extends ../layout
 
-    head
-        block head
-            meta(charset='utf-8')
-    
-            block head-links
-                link(rel='stylesheet', href='/styles/bootcraft.css')
-                link(rel='stylesheet', href='/styles/Play/player.css')
-                link(rel='stylesheet', href='/styles/Play/store.css')
-    
-            block head-scripts
-                script(src='/scripts/libs/jquery/1.10.2/jquery.min.js')
-                script(src='/scripts/libs/angularjs/1.2.0rc1/angular.min.js')
-                script(src='/scripts/libs/angularjs/1.2.0rc1/i18n/angular-locale_ru-ru.js')
-                script(src='/scripts/libs/angularjs/1.2.0rc1/angular-animate.min.js')
-                script(src='/scripts/libs/angularjs/1.2.0rc1/angular-route.min.js')
-                script(src='/scripts/libs/angularjs/1.2.0rc1/angular-resource.min.js')
 
-    body(ng-controller='ViewCtrl')
-        block body
+append head-scripts
+    include includes/Welcome.coffee
 
-            header.header
-                block header
 
-            section
-                block view-outer
-                    .view(ng-view)
+append dialog-container
+    section(ng-if="'login'==dialog.overlay"): include partials/login/dialog/index

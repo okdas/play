@@ -1,4 +1,4 @@
-app= angular.module 'play', ['ngAnimate', 'ngRoute', 'ngResource'], ($routeProvider) ->
+app= angular.module 'app', ['ngAnimate', 'ngRoute', 'ngResource'], ($routeProvider) ->
 
     $routeProvider.when '/player',
         templateUrl: 'partials/player/', controller: 'PlayerRouteCtrl', resolve:
