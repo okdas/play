@@ -31,7 +31,7 @@ app.controller 'LoginDialogCtrl', ($scope, $window) ->
 
     $scope.login= () ->
         $scope.player.$login () ->
-                do $scope.hideDialog
-                $window.location.href= '/player/'
+                #do $scope.hideDialog
+                $window.location.href= '/'
         ,   () ->
                 $scope.player.pass= ''

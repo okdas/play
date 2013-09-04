@@ -1,0 +1,15 @@
+section.view-inner(ng-if="'loaded' == state")
+    block section
+
+    .container
+        block section-container
+
+section
+    block dialog
+
+        .dialog(ng-if='dialog.overlay')
+            .dialog-bg(ng-click='hideDialog()')
+            .container: .row: .col-12.dialog-container
+                include dialog/index
+
+        .dialog-overlay(ng-if='dialog.overlay')

@@ -1,0 +1,20 @@
+extends ../layout
+
+block section-side
+    .player--payment-robokassa(ng-if='payment.robokassa')
+        form(action='{{payment.robokassa.url}}', method='POST')
+            input(type='hidden', name='MrchLogin', value='{{payment.robokassa.data.MrchLogin}}')
+            input(type='hidden', name='OutSum', value='{{payment.robokassa.data.OutSum}}')
+            input(type='hidden', name='InvId', value='{{payment.robokassa.data.InvId}}')
+            input(type='hidden', name='SignatureValue', value='{{payment.robokassa.data.SignatureValue}}')
+            button.btn.btn-block.btn-info Оплатить
+                span.visible-inline-lg пожертвование
+
+    .player--payment-status(ng-switch='payment.status')
+        b.btn.btn-link.link-primary(ng-switch-when='success') Статус:
+            b оплачен
+
+block section-body
+    .player--payment
+        b.btn.btn-link.link-primary.pull-right(href='#/payments') Сумма:
+            b {{payment.amount | currency}}

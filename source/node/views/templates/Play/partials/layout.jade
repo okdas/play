@@ -12,12 +12,10 @@ section.view-inner.view-inner-ready(ng-if='"ready"==state'): block section
                     nav.section-head-nav
                         block section-head-nav
 
-                            ul.nav.nav-row
-                                li(ng-repeat='server in store.servers', ng-class='{active:server.id==store.server.id}')
-                                    a(ng-href='#/servers/{{server.name}}') {{server.title}}
-
-                    span.pull-right Баланс: {{player.balance}}
-                    hr.section-sep
+                    nav.section-head-nav.pull-right
+                        ul.nav.nav-row
+                            li
+                                a(href='#/player/donate') Карма: {{player.balance}}
 
         .row
             .col-12.col-sm-12.col-lg-3

@@ -1,17 +1,15 @@
 !!!
 html(lang='ru', ng-app='play', ng-cloak)
 
-
-
     head
         block head
             meta(charset='utf-8')
-
+    
             block head-links
                 link(rel='stylesheet', href='/styles/bootcraft.css')
                 link(rel='stylesheet', href='/styles/Play/player.css')
                 link(rel='stylesheet', href='/styles/Play/store.css')
-
+    
             block head-scripts
                 script(src='/scripts/libs/jquery/1.10.2/jquery.min.js')
                 script(src='/scripts/libs/angularjs/1.2.0rc1/angular.min.js')
@@ -19,10 +17,6 @@ html(lang='ru', ng-app='play', ng-cloak)
                 script(src='/scripts/libs/angularjs/1.2.0rc1/angular-animate.min.js')
                 script(src='/scripts/libs/angularjs/1.2.0rc1/angular-route.min.js')
                 script(src='/scripts/libs/angularjs/1.2.0rc1/angular-resource.min.js')
-
-                include includes/Play.coffee
-
-
 
     body(ng-controller='ViewCtrl')
         block body

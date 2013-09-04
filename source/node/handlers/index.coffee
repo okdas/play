@@ -27,14 +27,14 @@ app.on 'mount', (parent) ->
 
 
     app.get '/', (req, res, next) ->
-        return res.redirect '/player/' if do req.isAuthenticated
-        return res.redirect '/welcome/'
-
-    app.get '/player', (req, res, next) ->
         return res.redirect '/welcome/' if do req.isUnauthenticated
         return do next
+    app.use '/', App.static "#{__dirname}/../views/templates/Play"
 
-    app.use App.static "#{__dirname}/../views/templates/Play"
+    app.get '/welcome', (req, res, next) ->
+        return res.redirect '/' if do req.isAuthenticated
+        return do next
+    app.use '/welcome', App.static "#{__dirname}/../views/templates/Welcome"
 
 
     ###

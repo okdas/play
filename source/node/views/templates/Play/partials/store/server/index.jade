@@ -31,11 +31,11 @@ append dialog
             i.icon-share-alt
             span  Предмет в продаже
 
-        .row: .col-12.dialog-body(ng-if="'done'==orderState")
+        .row: .col-12.dialog--body(ng-if="'done'==orderState")
             .row: .col-12.col-sm-12.col-lg-10.col-offset-1
                 h1.dialog-title: a(ng-href="#/storage/{{server.name}}") Спасибо за покупку
 
-        .row: .col-12.dialog-body(ng-if="'none'==orderState||'pending'==orderState")
+        .row: .col-12.dialog--body(ng-if="'none'==orderState||'pending'==orderState")
 
             .row: .col-12.col-sm-12.col-lg-10.col-offset-1
                 .item(ng-controller='StoreServerItemCtrl'): .row
