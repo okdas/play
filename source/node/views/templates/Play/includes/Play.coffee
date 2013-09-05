@@ -1,5 +1,8 @@
 app= angular.module 'app', ['ngAnimate', 'ngRoute', 'ngResource'], ($routeProvider) ->
 
+    $routeProvider.when '/',
+        templateUrl: 'partials/', controller: 'IndexRouteCtrl'
+
     $routeProvider.when '/player',
         templateUrl: 'partials/player/', controller: 'PlayerRouteCtrl', resolve:
             subscriptionList: ($q, Subscription) ->
@@ -46,6 +49,9 @@ app.factory 'Subscription', ($resource) ->
     $resource '/api/v1/player/subscriptions/:subscriptionId/:action', {subscriptionId:'@id'},
         query: {method:'GET', isArray:true, cache:true}
         subscribe: {method:'POST', params:{action:'subscribe'}}
+
+app.controller 'IndexRouteCtrl', ($scope, $route) ->
+    $scope.state= 'ready'
 
 app.controller 'PlayerRouteCtrl', ($scope, $route, Player, subscriptionList) ->
     $scope.state= 'ready'
