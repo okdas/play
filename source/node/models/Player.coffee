@@ -73,7 +73,6 @@ module.exports= class Player
                 if not err and rows.length
                     player= new @ rows[0]
 
-                console.log 'player', player
                 done err, player
 
     @getByNameAndPass: (player, maria, done) ->
