@@ -19,6 +19,51 @@ app= module.exports= do express
 
 
 ###
+Создает игрока
+###
+app.post '/players', access, (req, res, next) ->
+    ###
+    {
+        name: '',
+        pass: '',
+        email: '',
+        phone: ''
+    }
+    ###
+    player= req.body
+    player.pass= sha1 req.body.pass
+
+    async.waterfall [
+
+        (done) ->
+            req.db.getConnection (err, conn) ->
+                return done err, conn if err
+                conn.query 'SET sql_mode="STRICT_TRANS_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE"', (err) ->
+                    return done err, conn if err
+                    conn.query 'START TRANSACTION', (err) ->
+                        return done err, conn
+
+        (conn, done) ->
+            conn.query 'INSERT INTO player SET ?'
+            ,   [player]
+            ,   (err, resp) ->
+                    if resp.affectedRows != 1
+                        err= 'fail'
+
+                    return done err, conn
+
+        (conn, done) ->
+            conn.query 'COMMIT', (err) ->
+                return done err, conn
+
+    ],  (err, conn) ->
+            do conn.end if conn
+
+            return next err if err
+            return res.json 200, player
+
+
+###
 Отдает аутентифицированного игрока.
 ###
 app.get '/', access, (req, res, next) ->
@@ -59,6 +104,64 @@ app.get '/', access, (req, res, next) ->
 
             return next err if err
             return res.json 400, player if not player
+            return res.json 200, player
+
+
+
+###
+Обновление аутентифицированного игрока.
+###
+app.put '/', access, (req, res, next) ->
+    ###
+    {
+        newPass: "",
+        oldPass: "",
+        email: "",
+        phone: ""
+    }
+    ###
+    player= req.body
+
+    async.waterfall [
+
+        (done) ->
+            req.db.getConnection (err, conn) ->
+                return done err, conn if err
+                conn.query 'SET sql_mode="STRICT_TRANS_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE"', (err) ->
+                    return done err, conn if err
+                    conn.query 'START TRANSACTION', (err) ->
+                        return done err, conn
+
+        (conn, done) ->
+            if player.newPass
+                q= "UPDATE player
+                    SET
+                        pass = '#{player.newPass}',
+                        email = '#{player.email}',
+                        phone = '#{player.phone}'
+                    WHERE pass = '#{player.oldPass}' AND id = #{req.user.id}"
+            else
+                q= "UPDATE player
+                    SET
+                        email = '#{player.email}',
+                        phone = '#{player.phone}'
+                    WHERE id = #{req.user.id}"
+
+            conn.query q
+            ,   (err, resp) ->
+                    if resp.affectedRows != 1
+                        err= 'fail'
+
+                    return done err, conn
+
+        (conn, done) ->
+            conn.query 'COMMIT', (err) ->
+                return done err, conn
+
+    ],  (err, conn) ->
+            do conn.end if conn
+
+            return next err if err
             return res.json 200, player
 
 
