@@ -1,10 +1,7 @@
 app= angular.module 'app', ['ngResource', 'ngRoute'], ($routeProvider) ->
 
     $routeProvider.when '/',
-        templateUrl: 'partials/login/', controller: 'WelcomeCtrl'
-
-    $routeProvider.when '/registration',
-        templateUrl: 'partials/registration/', controller: 'WelcomeRegistrationCtrl'
+        templateUrl: 'partials/', controller: 'WelcomeCtrl'
 
     $routeProvider.otherwise
         redirectTo: '/'
@@ -32,18 +29,27 @@ app.controller 'ViewCtrl', ($scope, $rootScope, $location, Player) ->
 
 
 app.controller 'WelcomeCtrl', ($scope, $rootScope) ->
-    $rootScope.showLoginDialog= () ->
-        $rootScope.dialog.templateUrl= 'partials/login/dialog/'
-        $rootScope.showDialog 'login'
-
-app.controller 'WelcomeRegistrationCtrl', ($scope) ->
     $scope.state= 'ready'
 
+    $rootScope.showSigninDialog= () ->
+        $rootScope.showDialog 'signin'
 
-app.controller 'LoginDialogCtrl', ($scope, $window) ->
+    $rootScope.showSignupDialog= () ->
+        $rootScope.showDialog 'signup'
 
-    $scope.login= () ->
+
+app.controller 'SigninDialogCtrl', ($scope, $window) ->
+
+    $scope.signin= () ->
         $scope.player.$login () ->
+                $window.location.href= '/'
+        ,   () ->
+                $scope.player.pass= ''
+
+app.controller 'SignupDialogCtrl', ($scope, $window) ->
+
+    $scope.signup= () ->
+        $scope.player.$create () ->
                 $window.location.href= '/'
         ,   () ->
                 $scope.player.pass= ''

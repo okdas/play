@@ -6,4 +6,12 @@ append head-scripts
 
 
 append dialog-container
-    section(ng-if="'login'==dialog.overlay"): include partials/login/dialog/index
+    section(ng-if="'signin'==dialog.overlay"): include partials/signin/dialog/index
+    section(ng-if="'signup'==dialog.overlay"): include partials/signup/dialog/index
+
+append view-outer
+    .view--body: block view-body
+        script(src='//vk.com/js/api/openapi.js?100')
+        #vk
+        script.
+            VK.Widgets.Group('vk', {mode: 2, wide: 1, width: '960', height: '400'}, 30115234)

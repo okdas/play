@@ -1,0 +1,18 @@
+.row: .col-12.dialog--head.dialog--head-info
+    i.icon-beaker
+    span  Запись на бета-тестирование
+
+.row: .col-12.dialog--body
+
+    .row: .col-8.col-offset-2
+        h2.dialog--title Записаться в бета-тестеры
+
+    .row: .col-8.col-offset-2
+
+        form.form-large(name='signupForm', ng-controller='SignupDialogCtrl').dialog-form
+            input.input(type='text', name='email', placeholder='Электронная почта', required, ng-model='player.mail')
+
+            .form-actions
+                button.btn(type='submit', ng-click='signup(player)', ng-disabled='!signupForm.$valid')
+                    i.icon-beaker
+                    span  Записаться в бета-тестеры
