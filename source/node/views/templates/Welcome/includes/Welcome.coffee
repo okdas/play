@@ -10,6 +10,7 @@ app= angular.module 'app', ['ngResource', 'ngRoute'], ($routeProvider) ->
 app.factory 'Player', ($resource) ->
     $resource '/api/v1/player/:action', {},
         login: {method:'post', params:{action:'login'}}
+        register: {method:'post', params:{action:'register'}}
 
 
 app.controller 'ViewCtrl', ($scope, $rootScope, $location, Player) ->
@@ -17,10 +18,12 @@ app.controller 'ViewCtrl', ($scope, $rootScope, $location, Player) ->
         $scope.player= new Player
 
         $rootScope.dialog=
+            state: null
             overlay: null
             templateUrl: null
 
         $rootScope.showDialog= (name) ->
+            $rootScope.dialog.state= 'none'
             $rootScope.dialog.overlay= name or true
 
         $rootScope.hideDialog= () ->
@@ -39,17 +42,21 @@ app.controller 'WelcomeCtrl', ($scope, $rootScope) ->
 
 
 app.controller 'SigninDialogCtrl', ($scope, $window) ->
-
     $scope.signin= () ->
-        $scope.player.$login () ->
+        $scope.dialog.state= 'busy'
+        $scope.player.$login (player) ->
+                $scope.dialog.state= 'done'
+                player.pass= null
                 $window.location.href= '/'
         ,   () ->
+                $scope.dialog.state= 'none'
                 $scope.player.pass= ''
 
 app.controller 'SignupDialogCtrl', ($scope, $window) ->
-
     $scope.signup= () ->
-        $scope.player.$create () ->
-                $window.location.href= '/'
+        $scope.dialog.state= 'busy'
+        $scope.player.$register () ->
+                $scope.dialog.state= 'done'
         ,   () ->
+                $scope.dialog.state= 'fail'
                 $scope.player.pass= ''

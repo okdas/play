@@ -1,4 +1,4 @@
-.row: .col-12.dialog--head.dialog--head-info
+.row: .col-12.dialog--head(ng-class="{'info':'busy'!=dialog.state}")
     i.icon-signin
     span  Вход с паролем
 
@@ -14,6 +14,6 @@
             input.input(type='password', name='password', placeholder='Пароль', required, ng-model='player.pass')
 
             .form-actions
-                button.btn(type='submit', ng-click='signin(player)', ng-disabled='!signinForm.$valid')
+                button.btn(type='submit', ng-click='signin(player)', ng-disabled="!signinForm.$valid || 'busy'==dialog.state")
                     i.icon-signin
                     span  Представиться

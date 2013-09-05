@@ -1,18 +1,28 @@
-.row: .col-12.dialog--head.dialog--head-info
+.row: .col-12.dialog--head(ng-class="{'primary':'none'==dialog.state, 'info':'done'==dialog.state}")
     i.icon-beaker
     span  Запись на бета-тестирование
 
-.row: .col-12.dialog--body
+.row(ng-if="'done'==dialog.state"): .col-12.dialog--body
+    .row: .col-12.col-sm-12.col-lg-10.col-offset-1
+        h1.dialog-title Спасибо за регистрацию
+
+.row(ng-if="'done'!=dialog.state"): .col-12.dialog--body
 
     .row: .col-8.col-offset-2
-        h2.dialog--title Записаться в бета-тестеры
+        h2.dialog--title Записаться в бета-тестеры {{signupState}}
 
     .row: .col-8.col-offset-2
 
-        form.form-large(name='signupForm', ng-controller='SignupDialogCtrl').dialog-form
-            input.input(type='text', name='email', placeholder='Электронная почта', required, ng-model='player.mail')
+        form.form-large(name='signupForm', ng-controller="SignupDialogCtrl").dialog-form
+            fieldset
+                input.input(type='text', name='name', placeholder='Имя', required, ng-model="player.name")
+                input.input(type='password', name='password', placeholder='Пароль', required, ng-model="player.pass")
+                input.input(type='password', name='password', placeholder='Пароль еще раз', required, ng-model="pass")
+            fieldset
+                input.input(type='text', name='email', placeholder='Электронная почта', required, ng-model="player.email")
+                input.input(type='text', name='phone', placeholder='Телефон', required, ng-model="player.phone")
 
             .form-actions
-                button.btn(type='submit', ng-click='signup(player)', ng-disabled='!signupForm.$valid')
+                button.btn(type='submit', ng-click="signup(player)", ng-disabled="!signupForm.$valid || player.pass != pass || 'busy'==dialog.state")
                     i.icon-beaker
-                    span  Записаться в бета-тестеры
+                    span  Записаться
