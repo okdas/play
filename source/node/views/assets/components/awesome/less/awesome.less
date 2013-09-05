@@ -170,6 +170,33 @@ select {
     .navbar-nav > li > a {
         color: #CDBFE3;
     }
+    .navbar-nav > .active > a,
+    .navbar-nav > .active > a:hover {
+        cursor: default;
+        background-color: #463265;
+    }
+    .navbar-nav > .open > a,
+    .navbar-nav > .open > a:hover {
+        cursor: default;
+        background-color: #357EBD !important;
+    }
+    .navbar-nav > .dropdown > .dropdown-menu {
+        margin: 0;
+        background-color: #357EBD !important;
+        border: none;
+        border: 1px solid #3071A9; border-top: 0;
+        border-radius: 1px;
+
+        & > li > a {
+            padding: 10px 15px;
+            background: none;
+            color: #fff;
+            &:hover, &:focus {
+                color: #fff;
+                background: none;
+            }
+        }
+    }
 }
 
 .navbar-brand, .section-head-title {

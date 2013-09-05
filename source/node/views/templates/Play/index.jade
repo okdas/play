@@ -9,8 +9,19 @@ append header
         .col-12
           a.navbar-brand(href='./')
             span STREAMCRAFT
+
           ul.nav.navbar-nav
-            li: a(href='#/store') Магазин
-            li: a(href='#/storage') Склад
+
+            li(ng-class="{'active':'store'==route}")
+                a(ng-href='#/store/{{server.name}}') Магазин
+
+            li(ng-class="{'active':'storage'==route}")
+                a(ng-href='#/storage/{{server.name}}') Склад
+
           ul.nav.navbar-nav.pull-right
-            li: a(href='#/player') {{player.name}}
+            li(ng-class="{'active':'player'==route}").dropdown
+                a#playerDropdown(href='#/player', data-toggle='dropdown', data-target='#', onclick="return false") {{player.name}} 
+                    b.caret
+                ul.dropdown-menu
+                    li: a(href='#/player') Личный кабинет
+                    li: a(href='', ng-click='logout()') Выход

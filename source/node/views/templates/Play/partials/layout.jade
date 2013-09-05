@@ -15,7 +15,7 @@ section.view-inner.view-inner-ready(ng-if='"ready"==state'): block section
                     nav.section-head-nav.pull-right
                         ul.nav.nav-row
                             li
-                                a(href='#/player/donate') Карма: {{player.balance}}
+                                a(href='', ng-click="showPlayerPaymentDialog()") {{player.balance | currency:'₨'}}
 
         .row
             .col-12.col-sm-12.col-lg-3
@@ -24,10 +24,10 @@ section.view-inner.view-inner-ready(ng-if='"ready"==state'): block section
             .col-12.col-sm-12.col-lg-9
                 block section-body
 
-    .dialog(ng-if='dialog.overlay')
-        .dialog-bg(ng-click='hideDialog()')
+    .dialog(ng-if="view.dialog.overlay")
+        .dialog-bg(ng-click='hideViewDialog()')
         .container: .row: .col-12.dialog-container: block dialog
-    .dialog-overlay(ng-if='dialog.overlay')
+    .dialog-overlay(ng-if="view.dialog.overlay")
 
 
 section.view-inner.view-inner-error(ng-if='"error"==state'): block error

@@ -1,12 +1,13 @@
 extends ./layout
 
 
-block section-head-title--payments
-    span Пожертвования
+block section-head-nav
+    ul.nav.nav-row
+        li.active: a(href='#/player/payments') Пожертвования
 
 
 block section-side
-    button.btn.btn-block.btn-primary(ng-click='showPayDialog()') Пожертвовать еще
+    button.btn.btn-block.btn-primary(ng-click='showPlayerPaymentDialog()') Пожертвовать еще
 
 
 block section-body
@@ -37,23 +38,23 @@ block section-body
             tr.player--payment(ng-repeat='payment in payments')
 
                 td.t-cel
-                    a.cel.cel-right(ng-class="{'cel-primary':payment.status=='pending'}", ng-href='#/payments/{{payment.id}}') {{payment.id}}
+                    a.cel.cel-right(ng-class="{'cel-primary':payment.status=='pending'}", ng-href='#/player/payments/{{payment.id}}') {{payment.id}}
 
                 td.t-cel
-                    a.cel(ng-class="{'cel-primary':payment.status=='pending'}", ng-href='#/payments/{{payment.id}}', title="{{payment.createdAt | date:'dd.MM.yyyy HH:mm'}}")
+                    a.cel(ng-class="{'cel-primary':payment.status=='pending'}", ng-href='#/player/payments/{{payment.id}}', title="{{payment.createdAt | date:'dd.MM.yyyy HH:mm'}}")
                         span.hidden-inline-lg {{payment.createdAt | date:'dd.MM.yyyy'}}
                         span.visible-inline-lg {{payment.createdAt | date:'dd MMMM, HH:mm'}}
                 
                 td.t-cel
-                    a.cel(ng-class="{'cel-primary':payment.status=='pending'}", ng-href='#/payments/{{payment.id}}', title="{{payment.closedAt | date:'dd.MM.yyyy HH:mm'}}")
+                    a.cel(ng-class="{'cel-primary':payment.status=='pending'}", ng-href='#/player/payments/{{payment.id}}', title="{{payment.closedAt | date:'dd.MM.yyyy HH:mm'}}")
                         span.hidden-inline-lg {{payment.closedAt | date:'dd.MM.yyyy'}}
                         span.visible-inline-lg {{payment.closedAt | date:'dd MMMM, HH:mm'}}
 
                 td.t-cel
-                    a.cel.pull-right.player--payment-title(ng-class="{'cel-primary':payment.status=='pending'}", ng-href='#/payments/{{payment.id}}') {{payment.amount | currency}}
+                    a.cel.pull-right.player--payment-title(ng-class="{'cel-primary':payment.status=='pending'}", ng-href='#/player/payments/{{payment.id}}') {{payment.amount | currency}}
 
                 td.t-cel
-                    a.cel.pull-left(ng-class="{'cel-primary':payment.status=='pending'}", ng-href='#/payments/{{payment.id}}')
+                    a.cel.pull-left(ng-class="{'cel-primary':payment.status=='pending'}", ng-href='#/player/payments/{{payment.id}}')
                         .player--payment-status(ng-if="payment.status=='pending'")
                             span Не оплачен
                         .player--payment-status(ng-if="payment.status=='success'")

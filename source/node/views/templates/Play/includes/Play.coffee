@@ -3,6 +3,7 @@ app= angular.module 'app', ['ngAnimate', 'ngRoute', 'ngResource'], ($routeProvid
     $routeProvider.when '/',
         templateUrl: 'partials/', controller: 'PlayCtrl'
 
+
     $routeProvider.when '/player',
         templateUrl: 'partials/player/', controller: 'PlayerRouteCtrl', resolve:
             subscriptionList: ($q, Subscription) ->
@@ -11,20 +12,19 @@ app= angular.module 'app', ['ngAnimate', 'ngRoute', 'ngResource'], ($routeProvid
                     dfd.resolve subscriptions
                 dfd.promise
 
-    $routeProvider.when '/player/donate/payments',
-        templateUrl:'partials/player/donate/payments/', controller:'PlayerPaymentListCtrl'
+    $routeProvider.when '/player/payments',
+        templateUrl:'partials/player/payments/', controller:'PlayerPaymentsCtrl'
 
-    $routeProvider.when '/player/donate/payments/:paymentId',
-        templateUrl: 'partials/player/donate/payments/payment/', controller:'PlayerPaymentCtrl'
+    $routeProvider.when '/player/payments/:paymentId',
+        templateUrl: 'partials/player/payments/payment/', controller:'PlayerPaymentCtrl'
 
-    $routeProvider.when '/store/:server',
-        templateUrl: 'partials/servers/', controller: 'StoreServerCtrl'
 
     $routeProvider.when '/store',
         templateUrl: 'partials/store/', controller: 'StoreCtrl'
 
     $routeProvider.when '/store/:server',
         templateUrl: 'partials/store/server/', controller: 'StoreServerCtrl'
+
 
     $routeProvider.when '/storage',
         templateUrl: 'partials/storage/', controller: 'StorageCtrl'
@@ -84,15 +84,43 @@ app.controller 'ViewCtrl', ($scope, $rootScope, $location, $window, Player, Serv
     $rootScope.hideDialog= () ->
         $rootScope.dialog.overlay= null
 
-    $scope.showPayDialog= () ->
-        $scope.showDialog 'pay'
+
+    $rootScope.view= {}
+    $rootScope.view.dialog=
+        overlay: null
+        state: null
+
+    $rootScope.showViewDialog= (type) ->
+        $rootScope.view.dialog.state= 'none'
+        $rootScope.view.dialog.overlay= type or true
+
+    $rootScope.hideViewDialog= () ->
+        $rootScope.view.dialog.overlay= null
 
 
-app.controller 'PlayCtrl', ($scope, $route) ->
+    $scope.showPlayerPaymentDialog= () ->
+        $scope.showDialog 'payment'
+
+
+app.controller 'PlayCtrl', ($scope, $rootScope, $route) ->
+    $rootScope.route= 'play'
+    $rootScope.server= null
+
     $scope.state= 'ready'
     $scope.showContactDialog= () ->
         $scope.showDialog 'contact'
 
+
+app.controller 'PlayerPaymentDialogCtrl', ($scope, $location, PlayerPayment, $log) ->
+    $scope.payment= new PlayerPayment
+    $scope.create= () ->
+        $scope.dialog.state= 'busy'
+        $scope.payment.$create (payment) ->
+                $scope.dialog.state= 'done'
+                $location.path "/player/payments/#{payment.id}"
+                do $scope.hideDialog
+        ,   () ->
+                $scope.dialog.state= 'fail'
 
 
 app.factory 'Contact', ($resource) ->
@@ -110,7 +138,10 @@ app.controller 'ContactDialogCtrl', ($scope, $route, Contact) ->
 
 
 
-app.controller 'PlayerRouteCtrl', ($scope, $route, Player, subscriptionList) ->
+app.controller 'PlayerRouteCtrl', ($scope, $rootScope, $route, Player, subscriptionList) ->
+    $rootScope.route= 'player'
+    $rootScope.server= null
+
     $scope.state= 'ready'
 
     $scope.subscriptions= subscriptionList
@@ -121,21 +152,9 @@ app.controller 'PlayerRouteCtrl', ($scope, $route, Player, subscriptionList) ->
         ,   () ->
                 console.log 'не удалось подписаться'
 
-app.controller 'PlayerPaymentCreateCtrl', ($scope, $location, PlayerPayment, $log) ->
-    $scope.payment= new PlayerPayment
-    $scope.create= () ->
-        $log.info 'Заплатить'
-        $scope.payment.$create (payment) ->
-                $log.info 'запись о пополнении создана'
-                do $scope.hideDialog
-                $location.path "/payments/#{payment.id}"
-        ,   () ->
-                $log.error 'запись о пополнении не создана'
 
 
-
-
-app.controller 'PlayerPaymentListCtrl', ($scope, PlayerPayment, $log) ->
+app.controller 'PlayerPaymentsCtrl', ($scope, PlayerPayment, $log) ->
     $scope.state= null
     $scope.payments= PlayerPayment.query () ->
         $scope.state= 'ready'
@@ -174,7 +193,11 @@ app.factory 'ServerStorageItem', ($resource) ->
 
 
 
-app.controller 'PlayerCtrl', ($scope, $route, Player) ->
+
+app.controller 'PlayerCtrl', ($scope, $rootScope, $route, Player) ->
+    $rootScope.route= 'player'
+    $rootScope.server= null
+
     $scope.player= Player.get () ->
             $scope.state= 'ready'
     ,   (err) ->
@@ -188,73 +211,75 @@ app.controller 'PlayerCtrl', ($scope, $route, Player) ->
 
 
 app.controller 'StoreCtrl', ($scope, $rootScope, $q, $log) ->
+    $rootScope.route= 'store'
+    $rootScope.server= null
+
     $scope.state= null
-
-    $scope.server= null
-
     promise= $q.all
         player: $rootScope.player.$promise
         servers: $rootScope.servers.$promise
     promise.then (resources) ->
-            $log.info 'resolved', resources
             $scope.state= 'ready'
     ,   (error) ->
             $scope.state= 'error'
 
 
-app.controller 'StorageCtrl', ($scope, $rootScope, $q, $log) ->
-    $scope.server= null
+
+app.controller 'StoreServerCtrl', ($scope, $rootScope, $q, $routeParams, ServerStore, $log) ->
+    $rootScope.route= 'store'
 
     $scope.state= null
-
     promise= $q.all
         player: $rootScope.player.$promise
-        servers: $rootScope.servers.$promise
-    promise.then (resources) ->
-            $log.info 'resolved', resources
-            $scope.state= 'ready'
-    ,   (error) ->
-            $scope.state= 'error'
+        servers: $scope.store.servers.$promise
+    promise.then (res) ->
 
-
-app.controller 'StorageServerCtrl', ($scope, $rootScope, $q, $routeParams, ServerStorage, $log) ->
-    $scope.state= null
-
-    $scope.storage= null
-
-    promise= $q.all
-        player: $rootScope.player.$promise
-        servers: $rootScope.servers.$promise
-    promise.then (resources) ->
-            $log.info 'resolved', resources
             server= $rootScope.server= $rootScope.getServerByName $routeParams.server
-            console.log 'root server', server
-            ServerStorage.get
+
+            ServerStore.get
                 serverId: server.id
-            ,   (storage) ->
-                    $log.info 'resolved storage', storage
-                    $scope.storage= $rootScope.server.storage= storage
+            ,   (store) ->
+                    $scope.store= store
                     $scope.state= 'ready'
     ,   (error) ->
             $scope.state= 'error'
 
 
-app.controller 'StoreServerCtrl', ($scope, $rootScope, $q, $routeParams, ServerStore, $log) ->
+
+
+
+
+app.controller 'StorageCtrl', ($scope, $rootScope, $q, $log) ->
+    $rootScope.route= 'storage'
+    $rootScope.server= null
+
     $scope.state= null
-
-    console.log 'store server'
-
     promise= $q.all
         player: $rootScope.player.$promise
-        servers: $scope.store.servers.$promise
-    promise.then (res) ->
-            $log.info 'resolved', res
+        servers: $rootScope.servers.$promise
+    promise.then (resources) ->
+            $scope.state= 'ready'
+    ,   (error) ->
+            $scope.state= 'error'
+
+
+
+app.controller 'StorageServerCtrl', ($scope, $rootScope, $q, $routeParams, ServerStorage, $log) ->
+    $rootScope.route= 'storage'
+    $scope.storage= null
+
+    $scope.state= null
+    promise= $q.all
+        player: $rootScope.player.$promise
+        servers: $rootScope.servers.$promise
+    promise.then (resources) ->
+
             server= $rootScope.server= $rootScope.getServerByName $routeParams.server
-            ServerStore.get
+
+            ServerStorage.get
                 serverId: server.id
-            ,   (store) ->
-                    $log.info 'resolved store', store
-                    $scope.store= store
+            ,   (storage) ->
+                    $scope.storage= $rootScope.server.storage= storage
                     $scope.state= 'ready'
     ,   (error) ->
             $scope.state= 'error'
@@ -267,7 +292,7 @@ app.controller 'StoreServerItemCtrl', ($scope, $rootScope) ->
 
     $scope.showItemDetails= () ->
         $rootScope.item= $scope.item
-        $scope.showDialog 'item'
+        $scope.showViewDialog 'item'
 
 
 
@@ -464,3 +489,10 @@ app.controller 'StoreServerItemDetailsEnchCtrl', ($scope, $rootScope) ->
         $scope.ench.level= $scope.level
 
         $scope.price= $scope.xp * 0.03
+
+
+
+app.directive 'bDropdown', () ->
+    ($scope, $e, $a) ->
+        $e.attr 'data-target', '#'
+        do $e.dropdown

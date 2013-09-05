@@ -9,7 +9,7 @@
 .row(ng-if="'done'!=dialog.state"): .col-12.dialog--body
 
     .row: .col-8.col-offset-2
-        h2.dialog--title Записаться в бета-тестеры {{signupState}}
+        h2.dialog--title Записаться в бета-тестеры
 
     .row: .col-8.col-offset-2
 
@@ -23,6 +23,6 @@
                 input.input(type='text', name='phone', placeholder='Телефон', required, ng-model="player.phone")
 
             .form-actions
-                button.btn(type='submit', ng-click="signup(player)", ng-disabled="!signupForm.$valid || player.pass != pass || 'busy'==dialog.state")
+                button.btn.btn-primary(type='submit', ng-click="signup(player)", ng-disabled="!signupForm.$valid || player.pass != pass || 'busy'==dialog.state")
                     i.icon-beaker
-                    span  Записаться
+                    span  Записаться в бета-тестеры

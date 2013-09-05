@@ -17,6 +17,6 @@
             textarea.input(name='message', required, ng-model="contact.content")
 
             .form-actions
-                button.btn(type='submit', ng-click="send(contact)", ng-disabled="!form.$valid || 'busy'==dialog.state")
+                button.btn.btn-primary(type='submit', ng-click="send(contact)", ng-disabled="!form.$valid || 'busy'==dialog.state")
                     i.icon-envelope
                     span  Отправить сообщение

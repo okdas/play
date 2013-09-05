@@ -1,0 +1,18 @@
+.row: .col-12.dialog--head(ng-class="{'primary':'none'==dialog.state, 'info':'done'==dialog.state}")
+    i.icon-heart-empty
+    span  Пожертвование проекту
+
+.row: .col-12.dialog--body
+
+    .row: .col-8.col-offset-2
+        h2.dialog--title Поддержите проект
+
+    .row: .col-8.col-offset-2
+
+        form.form-large(name='form', ng-controller='PlayerPaymentDialogCtrl').dialog-form
+            input.input(type='text', name='amount', placeholder='Сумма в рублях', required, ng-model='payment.amount', ng-pattern="/^[0-9]{1,5}$/")
+
+            .form-actions
+                button.btn.btn-primary.btn-lg(type='submit', ng-click='create(payment)', ng-disabled="!form.$valid || 'busy'==dialog.state")
+                    i.icon-heart-empty
+                    span  Оплатить пожертвование

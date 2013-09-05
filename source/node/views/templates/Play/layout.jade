@@ -2,8 +2,11 @@ extends ../layout
 
 
 append head-scripts
+    script(src='/scripts/libs/bootstrap/3.0.0/dropdown.js')
+
     include includes/Play.coffee
 
 
 append dialog-container
     section(ng-if="'contact'==dialog.overlay"): include partials/contact/dialog/index
+    section(ng-if="'payment'==dialog.overlay"): include partials/player/payments/payment/dialog/index

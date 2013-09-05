@@ -26,7 +26,7 @@ append section-body
 
 
 append dialog
-    .item-dialog(ng-if="'item'==dialog.overlay", ng-controller="StoreServerItemDetailsCtrl")
+    .item-dialog(ng-if="'item'==view.dialog.overlay", ng-controller="StoreServerItemDetailsCtrl")
         .row: .col-12.dialog--head.info(ng-class="{'primary':'none'==orderState}")
             i.icon-share-alt
             span  Предмет в продаже
@@ -60,7 +60,7 @@ append dialog
 
             .row: .col-12.col-sm-12.col-lg-10.col-offset-1
                 .dialog-actions
-                    button.btn.pull-right(ng-click='order(item)', ng-disabled="'pending'==orderState") Купить {{item.amount}} шт. за {{item.price | currency:'₨'}}
+                    button.btn.btn-primary.pull-right(ng-click='order(item)', ng-disabled="'pending'==orderState") Купить {{item.amount}} шт. за {{item.price | currency:'₨'}}
 
 
 

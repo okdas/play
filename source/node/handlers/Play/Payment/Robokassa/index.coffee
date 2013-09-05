@@ -121,7 +121,7 @@ app.on 'mount', (parent) -> # монтирует модуль к приложе�
         data= req.query
         robokassa.checkPaymentSuccess data, (err, payment) ->
             return next err if err
-            return res.redirect "/player/#/payments/#{payment.InvId}"
+            return res.redirect "/#/player/payments/#{payment.InvId}"
 
 
 
