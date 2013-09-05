@@ -1,0 +1,22 @@
+.row: .col-12.dialog--head(ng-class="{'primary':'none'==dialog.state, 'info':'done'==dialog.state}")
+    i.icon-envelope
+    span  Сообщение разработчикам
+
+.row(ng-if="'done'==dialog.state"): .col-12.dialog--body
+    .row: .col-12.col-sm-12.col-lg-10.col-offset-1
+        h1.dialog-title Спасибо за неравнодушие
+
+.row(ng-if="'done'!=dialog.state"): .col-12.dialog--body
+
+    .row: .col-8.col-offset-2
+        h2.dialog--title Напишите нам что-нибудь
+
+    .row: .col-8.col-offset-2
+
+        form.form-large(name='form', ng-controller="ContactDialogCtrl").dialog-form
+            textarea.input(name='message', required, ng-model="contact.content")
+
+            .form-actions
+                button.btn.btn-primary(type='submit', ng-click="send(contact)", ng-disabled="!form.$valid || 'busy'==dialog.state")
+                    i.icon-envelope
+                    span  Отправить сообщение

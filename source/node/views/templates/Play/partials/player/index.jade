@@ -1,0 +1,19 @@
+extends ./layout
+
+
+block section-head-title
+    span Добро пожаловать, {{player.name}}
+
+
+block section-head-nav
+    ul.nav.nav-row
+        li: a(href='#/player/payments') Пожертвования
+
+block section-side
+    button.btn.btn-block.btn-primary(ng-click="showPlayerPaymentDialog()") Пожертвовать проекту
+
+
+block section-body
+    .row
+        .col-12.player--payments
+            b обычный игрок

@@ -14,34 +14,30 @@
     line-height: 21px;
     font-size: 14px; font-weight: 400;
     color:#eee;
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-radius: 1px;
+}
+.btn-default {
+    border-color: #7a59ab;
     text-shadow:
         0 1px 0 rgba(0,0,0,0.15)
     ;
-    border: 1px solid transparent;
-    border-radius: 1px;
-    background-image:
-        linear-gradient(#43a6e2, #277ac1)
-    ;
-    cursor: pointer;
 }
 .btn-primary {
-    color:#eee;
-    background-color:#428bca;
-    background-image:
-        linear-gradient(hsl(264, 33%, 57%), hsl(264, 33%, 51%))
-    ;
-    border-color:#428bca;
-    border: 1px solid #7a59ab;
+    color: #eee;
+    background-color: #428bca;
+    border-color: #428bca;
 }
 
-.btn:hover {
+.btn-default:hover {
     color:#fff;
-    text-shadow:
-        0 1px 0 rgba(0,0,0,0.3)
-    ;
     box-shadow:
         inset 0 -1px 5px -1px rgba(0,0,0,0.3),
         inset 0 11px 22px 1px #38a9ed
+    ;
+    text-shadow:
+        0 1px 0 rgba(0,0,0,0.3)
     ;
 }
 
@@ -49,21 +45,14 @@
     color:#fff;
     background-color:#357ebd;
     border-color:#3071a9;
-    border: 1px solid #7a59ab;
-    box-shadow:
-        inset 0 -1px 5px -1px rgba(0,0,0,0.2),
-        inset 0 11px 22px 1px hsl(264, 33%, 61%)
-    ;
 }
 
-.btn:active {
+.btn-default:active {
     text-shadow:
         0 -1px 0 rgba(0,0,0,0.15)
     ;
     box-shadow:
-        inset 0 1px 5px -1px rgba(0,0,0,0.3),
-        inset 0 11px 22px 1px rgba(0,0,0,0.1),
-        inset 0 0 2px 2px rgba(0,0,0,0.0)
+        inset 0 1px 5px -1px rgba(0,0,0,0.3)
     ;
 }
 .btn-primary:active {
@@ -102,6 +91,33 @@
     color: #7a59ab;
     &:hover {
         color: #62468B;
+    }
+}
+
+.btn {
+    &-lg {
+        font-size: 18px;
+        border-radius: 1px;
+    }
+}
+
+.btn-outline {
+    background: none;
+
+    &-inverse {
+        background-color: rgba(0, 0, 0, 0);
+        border-color: #CDBFE3;
+        color: #FFF;
+
+        &:hover, &:focus, &:active {
+            background-color: #FFF;
+            border-color: #FFF;
+            color: #563D7C;
+            text-shadow: none;
+        }
+        &:hover {
+            box-shadow: none;
+        }
     }
 }
 

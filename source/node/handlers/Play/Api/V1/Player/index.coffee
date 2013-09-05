@@ -7,182 +7,189 @@ sha1= (string) ->
     hash.update string
     return hash.digest 'hex'
 
-access= (req, res, next) ->
-    return next 401 if do req.isUnauthenticated
-    return do next
-
 ###
 Методы API для работы c аутентифицированным игроком.
 ###
 app= module.exports= do express
+app.on 'mount', (parent) ->
+    app.set 'maria', maria= parent.get 'maria'
 
 
 
-###
-Отдает аутентифицированного игрока.
-###
-app.get '/', access, (req, res, next) ->
+    ###
+    Отдает аутентифицированного игрока.
+    ###
+    app.get '/'
+    ,   access
 
-    id= req.user.id
+    ,   maria(
+            app.get 'db'
+        )
 
-    async.waterfall [
+    ,   loadPlayer(
+            maria.Player
+        )
 
-        (done) ->
-            req.db.getConnection (err, conn) ->
-                return done err, conn
+    ,   (req, res) ->
 
-        (conn, done) ->
-            conn.query "
-                SELECT
-                    Player.id,
-                    Player.name,
-                    PlayerBalance.amount as balance,
-                    Subscription.name as subscription
-                FROM
-                    ?? as Player
-                JOIN
-                    ?? as PlayerBalance ON PlayerBalance.playerId = Player.id
-                LEFT OUTER JOIN
-                    ?? as PlayerSubscription ON PlayerSubscription.id = Player.id
-                LEFT OUTER JOIN
-                    ?? as Subscription ON Subscription.id = PlayerSubscription.id
-                WHERE
-                    Player.id = ?
-                "
-            ,   ['player', 'player_balance', 'player_subscription', 'subscription', id]
-            ,   (err, resp) ->
-                    player= do resp.shift if not err
-                    return done err, conn, player
-
-    ],  (err, conn, player) ->
-            do conn.end if conn
-
-            return next err if err
-            return res.json 400, player if not player
-            return res.json 200, player
+            res.json 200, req.player
 
 
 
-###
-Выполняет вход игрока.
-###
-app.post '/login', (req, res, next) ->
+    ###
+    Аутентифицирует игрока.
+    ###
+    app.post '/login'
 
-    name= req.body.name
-    pass= sha1 req.body.pass
+    ,   maria(
+            app.get 'db'
+        )
 
-    async.waterfall [
+    ,   findPlayer(
+            maria.Player
+        )
 
-        (done) ->
-            req.db.getConnection (err, conn) ->
-                return done err, conn
+    ,   authPlayer(
+            maria.Player
+        )
 
-        (conn, done) ->
-            conn.query "
-                SELECT
-                    Player.id,
-                    Player.name
-                FROM
-                    ?? as Player
-                WHERE
-                    Player.name = ? AND
-                    Player.pass = ?
-                "
-            ,   ['player', name, pass]
-            ,   (err, rows) ->
-                    player= do rows.shift if not err
-                    return done err, conn, player
+    ,   (req, res) ->
 
-    ],  (err, conn, player) ->
-            do conn.end if conn
-
-            return next err if err
-            return res.json 400, player if not player
-
-            req.login player, (err) ->
-                return next err if err
-                return res.json 200, player
+            res.json 200, req.player
 
 
 
-###
-Выполняет выход игрока.
-###
-app.post '/logout', access, (req, res, next) ->
-    return res.json 400, null if req.user.name != req.body.name
+    ###
+    Деаутентифицирует игрока.
+    ###
+    app.post '/logout'
+    ,   access
 
-    do req.logout
-    return res.json 200, true
+    ,   exitPlayer(
+            maria.Player
+        )
 
+    ,   (req, res) ->
 
-
-###
-Отдает историю пополнений аутентифицированного игрока.
-###
-app.get '/payment', access, (req, res, next) ->
-    data= null
-    async.waterfall [
-
-        (done) ->
-            req.db.getConnection (err, conn) ->
-                return done err, conn
-
-        (conn, done) ->
-            conn.query "
-                SELECT
-                    payment.id,
-                    payment.amount,
-                    payment.createdAt,
-                    payment.closedAt,
-                    payment.status
-                FROM
-                    player_payment as payment
-                WHERE
-                    payment.playerId = ?
-                "
-            ,   [req.user.id]
-            ,   (err, rows) ->
-                    data= rows if not err
-                    return done err, conn
-
-    ],  (err, conn) ->
-            do conn.end if conn
-
-            return next err if err
-            return res.json 200, data
+            res.json 200, true
 
 
 
-###
-Пополняет счет аутетифицированного игрока.
-###
-app.post '/payment', access, (req, res, next) ->
+    ###
+    Регистрирует игрока.
+    ###
+    app.post '/register'
 
-    payment=
-        id: null
-        playerId: req.user.id
-        amount: req.body.amount
+    ,   maria(
+            app.get 'db'
+        )
 
-    async.waterfall [
+    ,   maria.transaction()
 
-        (done) ->
-            req.db.getConnection (err, conn) ->
-                return done err, conn if err
-                conn.query 'SET sql_mode="STRICT_TRANS_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE"', (err) ->
-                    return done err, conn
+    ,   createPlayer(
+            maria.Player
+        )
 
-        (conn, done) ->
-            conn.query "
-                INSERT INTO player_payment SET ?
-                "
-            ,   [payment]
-            ,   (err, resp) ->
-                    if not err
-                        payment.id= resp.insertId
-                    return done err, conn
+    ,   maria.transaction.commit()
 
-    ],  (err, conn) ->
-            do conn.end if conn
+    ,   (req, res) ->
 
-            return next err if err
-            return res.json 201, payment
+            res.json 201, req.player
+
+
+
+    ###
+    Обновляет аутентифицированного игрока.
+    ###
+    app.post '/'
+    ,   access
+
+    ,   maria(
+            app.get 'db'
+        )
+
+    ,   maria.transaction()
+
+    ,   updatePlayer(
+            maria.Player
+        )
+
+    ,   maria.transaction.commit()
+
+    ,   (req, res) ->
+
+            res.json 200, req.player
+
+
+
+access= (req, res, next) ->
+    return next 401 if do req.isUnauthenticated
+    return do next
+
+loadPlayer= (Player) ->
+    (req, res, next) ->
+        playerId= req.user.id
+
+        Player.get playerId, req.maria, (err, player) ->
+            req.player= player or null
+
+            if not err and not player
+                err= 'player not found'
+
+            return next err
+
+findPlayer= (Player) ->
+    (req, res, next) ->
+        player= new Player req.body
+        player.pass= sha1 req.body.pass or ''
+
+        Player.getByNameAndPass player, req.maria, (err, player) ->
+            req.player= player or null
+
+            if not err and not player
+                res.status 404
+                err= 'player not found'
+
+            return next err
+
+authPlayer= (Player) ->
+    (req, res, next) ->
+        req.login req.player, (err) ->
+            return next err
+
+exitPlayer= (Player) ->
+    (req, res, next) ->
+        if req.user.name != req.body.name
+            req.status 400
+            err= 'cannot logout'
+
+        if not err
+            do req.logout
+
+        return next err
+
+createPlayer= (Player) ->
+    (req, res, next) ->
+        player= new Player req.body
+        player.pass= sha1 req.body.pass or ''
+
+        Player.create player, req.maria, (err, player) ->
+            req.player= player or null
+
+            if not err and not player.id
+                res.status 400
+                err= 'player create error'
+
+            return next err
+
+updatePlayer= (Player) ->
+    (req, res, next) ->
+        player= new Player req.body
+        player.pass= sha1 req.body.pass or ''
+
+        playerId= req.user.id
+
+        Player.update playerId, player, req.maria, (err, player) ->
+            req.player= player or null
+
+            return next err

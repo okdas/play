@@ -1,0 +1,15 @@
+extends ./layout
+
+
+
+append header
+
+    .navbar.navbar-inverse.navbar-static-top
+        .container
+            a.navbar-brand(href='./')
+                span STREAMCRAFT
+            .nav-collapse.collapse
+                ul.nav.navbar-nav
+                ul.nav.navbar-nav.pull-right
+                    li: a(href='', ng-click="showSigninDialog()") Вход
+                    li: a(href='', ng-click="showSignupDialog()") Регистрация

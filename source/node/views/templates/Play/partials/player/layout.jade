@@ -1,0 +1,33 @@
+extends ../layout
+
+
+block section-container
+
+    .row
+        .col-12.section-head
+            block section-head
+
+                h1.section-head-title
+                    block section-head-title
+
+                nav.section-head-nav
+                    block section-head-nav
+
+                nav.section-head-nav.pull-right
+                    ul.nav.nav-row
+                        li.active
+                            a {{player.balance | currency:'₨'}}
+
+    .row
+        .col-12.col-sm-3.col-lg-3.col-push-9
+            block section-side
+
+        .col-12.col-sm-9.col-lg-9.col-pull-3
+            block section-body
+
+
+block section-head-nav
+
+    ul.nav.nav-row
+        li(ng-repeat='srv in servers', ng-class='{active:srv.id==server.id}')
+            a(ng-href='#/storage/{{srv.name}}') {{srv.title}}

@@ -1,0 +1,44 @@
+!!!
+html(lang='ru', ng-app='app', ng-cloak)
+
+
+
+    head
+        block head
+            meta(charset='utf-8')
+
+            block head-links
+                link(rel='stylesheet', href='/styles/bootcraft.css')
+                link(rel='stylesheet', href='/styles/Play/player.css')
+                link(rel='stylesheet', href='/styles/Play/store.css')
+
+            block head-scripts
+                script(src='/scripts/libs/jquery/1.10.2/jquery.min.js')
+                script(src='/scripts/libs/angularjs/1.2.0rc1/angular.min.js')
+                script(src='/scripts/libs/angularjs/1.2.0rc1/i18n/angular-locale_ru-ru.js')
+                script(src='/scripts/libs/angularjs/1.2.0rc1/angular-animate.min.js')
+                script(src='/scripts/libs/angularjs/1.2.0rc1/angular-route.min.js')
+                script(src='/scripts/libs/angularjs/1.2.0rc1/angular-resource.min.js')
+
+
+
+    body(ng-controller="ViewCtrl")
+
+
+        block body
+
+            header.header
+                block header
+
+            section
+                block view-outer
+                    .view(ng-view)
+
+
+        block dialog
+
+            .dialog(ng-if="dialog.overlay")
+                .dialog-bg(ng-click="hideDialog()")
+                .container: .row: .col-12.dialog-container: block dialog-container
+
+            .dialog-overlay(ng-if="dialog.overlay")

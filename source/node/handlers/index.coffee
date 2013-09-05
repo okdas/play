@@ -26,15 +26,22 @@ app.on 'mount', (parent) ->
     app.use do passport.session
 
 
-    app.get '/', (req, res, next) ->
-        return res.redirect '/player/' if do req.isAuthenticated
-        return res.redirect '/welcome/'
+    app.enable 'strict routing'
 
-    app.get '/player', (req, res, next) ->
+    app.get '/', (req, res, next) ->
         return res.redirect '/welcome/' if do req.isUnauthenticated
         return do next
 
-    app.use App.static "#{__dirname}/../views/templates/Play"
+    app.use '/', App.static "#{__dirname}/../views/templates/Play"
+
+    app.get '/welcome', (req, res, next) ->
+        return res.redirect '/welcome/'
+
+    app.get '/welcome/', (req, res, next) ->
+        return res.redirect '/' if do req.isAuthenticated
+        return do next
+
+    app.use '/welcome', App.static "#{__dirname}/../views/templates/Welcome"
 
 
     ###
@@ -72,3 +79,10 @@ app.on 'mount', (parent) ->
     ###
     app.use '/payment/robokassa'
     ,   require './Play/Payment/Robokassa'
+
+
+    ###
+    Методы API для отправки сообщений разработчикам
+    ###
+    app.use '/api/v1/player/messages'
+    ,   require './Play/Api/V1/Player/Messages'

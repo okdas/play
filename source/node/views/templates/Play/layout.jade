@@ -1,29 +1,12 @@
-!!!
-html(lang='ru', ng-app='play', ng-cloak)
+extends ../layout
 
-  head
-    block head
-      meta(charset='utf-8')
 
-      block head-links
+append head-scripts
+    script(src='/scripts/libs/bootstrap/3.0.0/dropdown.js')
 
-        link(rel='stylesheet', href='/styles/bootcraft.css')
+    include includes/Play.coffee
 
-      block head-scripts
 
-        script(src='/scripts/libs/jquery/1.10.2/jquery.min.js')
-        script(src='/scripts/libs/angularjs/1.2.0rc1/angular.min.js')
-        script(src='/scripts/libs/angularjs/1.2.0rc1/i18n/angular-locale_ru-ru.js')
-        script(src='/scripts/libs/angularjs/1.2.0rc1/angular-animate.min.js')
-        script(src='/scripts/libs/angularjs/1.2.0rc1/angular-route.min.js')
-        script(src='/scripts/libs/angularjs/1.2.0rc1/angular-resource.min.js')
-
-  body(ng-controller='ViewCtrl')
-    block body
-
-      header.header
-        block header
-
-      section
-        block view-outer
-          .view(ng-view)
+append dialog-container
+    section(ng-if="'contact'==dialog.overlay"): include partials/contact/dialog/index
+    section(ng-if="'payment'==dialog.overlay"): include partials/player/payments/payment/dialog/index
