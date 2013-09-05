@@ -21,7 +21,9 @@ app.on 'mount', (parent) ->
             app.get 'db'
         )
 
-    ,   loadServers(maria.Server)
+    ,   loadServers(
+            maria.Server
+        )
 
     ,   (req, res) ->
 
