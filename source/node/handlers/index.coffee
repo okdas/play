@@ -79,3 +79,10 @@ app.on 'mount', (parent) ->
     ###
     app.use '/payment/robokassa'
     ,   require './Play/Payment/Robokassa'
+
+
+    ###
+    Методы API для отправки сообщений разработчикам
+    ###
+    app.use '/api/v1/player/messages'
+    ,   require './Play/Api/V1/Player/Messages'

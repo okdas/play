@@ -3,3 +3,7 @@ extends ../layout
 
 append head-scripts
     include includes/Play.coffee
+
+
+append dialog-container
+    section(ng-if="'contact'==dialog.overlay"): include partials/contact/dialog/index

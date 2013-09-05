@@ -1,7 +1,7 @@
 app= angular.module 'app', ['ngAnimate', 'ngRoute', 'ngResource'], ($routeProvider) ->
 
     $routeProvider.when '/',
-        templateUrl: 'partials/', controller: 'IndexRouteCtrl'
+        templateUrl: 'partials/', controller: 'PlayCtrl'
 
     $routeProvider.when '/player',
         templateUrl: 'partials/player/', controller: 'PlayerRouteCtrl', resolve:
@@ -50,8 +50,65 @@ app.factory 'Subscription', ($resource) ->
         query: {method:'GET', isArray:true, cache:true}
         subscribe: {method:'POST', params:{action:'subscribe'}}
 
-app.controller 'IndexRouteCtrl', ($scope, $route) ->
+
+
+app.controller 'ViewCtrl', ($scope, $rootScope, $location, $window, Player, Server, $log) ->
+
+    $rootScope.player= Player.get () ->
+        $log.info 'игрок получен'
+
+    $rootScope.logout= () ->
+        $rootScope.player.$logout () ->
+            $window.location.href= '/'
+
+    $rootScope.servers= Server.query ->
+        $log.info 'список серверов получен'
+
+    $rootScope.getServerByName= (name) ->
+        for server in $rootScope.servers
+            return server if server.name == name
+
+    $rootScope.store=
+        servers: Server.query ->
+            $log.info 'список серверов получен'
+
+
+    $rootScope.dialog=
+        overlay: null
+        state: null
+
+    $rootScope.showDialog= (type) ->
+        $rootScope.dialog.state= 'none'
+        $rootScope.dialog.overlay= type or true
+
+    $rootScope.hideDialog= () ->
+        $rootScope.dialog.overlay= null
+
+    $scope.showPayDialog= () ->
+        $scope.showDialog 'pay'
+
+
+app.controller 'PlayCtrl', ($scope, $route) ->
     $scope.state= 'ready'
+    $scope.showContactDialog= () ->
+        $scope.showDialog 'contact'
+
+
+
+app.factory 'Contact', ($resource) ->
+    $resource '/api/v1/player/messages', {},
+        send: {method:'post'}
+
+app.controller 'ContactDialogCtrl', ($scope, $route, Contact) ->
+    $scope.contact= new Contact
+    $scope.send= () ->
+        $scope.dialog.state= 'busy'
+        $scope.contact.$send (contact) ->
+                $scope.dialog.state= 'done'
+        ,   () ->
+                $scope.dialog.state= 'none'
+
+
 
 app.controller 'PlayerRouteCtrl', ($scope, $route, Player, subscriptionList) ->
     $scope.state= 'ready'
@@ -74,6 +131,8 @@ app.controller 'PlayerPaymentCreateCtrl', ($scope, $location, PlayerPayment, $lo
                 $location.path "/payments/#{payment.id}"
         ,   () ->
                 $log.error 'запись о пополнении не создана'
+
+
 
 
 app.controller 'PlayerPaymentListCtrl', ($scope, PlayerPayment, $log) ->
@@ -111,40 +170,6 @@ app.factory 'ServerStorageItem', ($resource) ->
     ,   {serverId:'@serverId', itemId:'@itemId'}
     ,
         order: {method:'POST', params:{action:'order'}}
-
-
-app.controller 'ViewCtrl', ($scope, $rootScope, $location, $window, Player, Server, $log) ->
-
-    $rootScope.player= Player.get () ->
-        $log.info 'игрок получен'
-
-    $rootScope.logout= () ->
-        $rootScope.player.$logout () ->
-            $window.location.href= '/'
-
-    $rootScope.servers= Server.query ->
-        $log.info 'список серверов получен'
-
-    $rootScope.getServerByName= (name) ->
-        for server in $rootScope.servers
-            return server if server.name == name
-
-    $rootScope.store=
-        servers: Server.query ->
-            $log.info 'список серверов получен'
-
-
-    $rootScope.dialog=
-        overlay: null
-
-    $rootScope.showDialog= (type) ->
-        $rootScope.dialog.overlay= type or true
-
-    $rootScope.hideDialog= () ->
-        $rootScope.dialog.overlay= null
-
-    $scope.showPayDialog= () ->
-        $scope.showDialog 'pay'
 
 
 
@@ -377,17 +402,14 @@ app.controller 'StoreServerItemDetailsCtrl', ($scope, $rootScope, ServerStoreIte
 
     $scope.orderState= 'none'
     $scope.order= (item) ->
-        console.log 'order', item
         $scope.orderState= 'pending'
         order=
             serverId: $scope.server.id
             itemId: item.id
             item: item
         ServerStoreItem.order order, () ->
-                console.log 'получилось'
                 $scope.orderState= 'done'
         ,   () ->
-                console.log 'не получилось'
                 $scope.orderState= 'fail'
 
 
