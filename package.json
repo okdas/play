@@ -15,6 +15,7 @@
     }
   },
   "scripts": {
+    "start": "grunt & node app/node.js",
     "install": "grunt",
     "postinstall": "cd app/; npm install"
   },
