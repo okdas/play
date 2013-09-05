@@ -105,6 +105,33 @@
     }
 }
 
+.btn {
+    &-lg {
+        font-size: 18px;
+        border-radius: 1px;
+    }
+}
+
+.btn-outline {
+    background: none;
+
+    &-inverse {
+        background-color: rgba(0, 0, 0, 0);
+        border-color: #CDBFE3;
+        color: #FFF;
+
+        &:hover, &:focus, &:active {
+            background-color: #FFF;
+            border-color: #FFF;
+            color: #563D7C;
+            text-shadow: none;
+        }
+        &:hover {
+            box-shadow: none;
+        }
+    }
+}
+
 .btn-small {
     border-width:0;
     padding: 0 15px;

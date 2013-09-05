@@ -164,9 +164,11 @@ select {
 
 
 .navbar-inverse {
-    .navbar-brand, 
+    .navbar-brand {
+        color: #efefef;
+    }
     .navbar-nav > li > a {
-        color: #ccc;
+        color: #CDBFE3;
     }
 }
 
@@ -474,10 +476,43 @@ html {
     }
 }
 
-.view-title {
-    margin:0;
-    border-left:1px solid #e2e2e2;
+
+//.view-title {
+//    margin:0;
+//    border-left:1px solid #e2e2e2;
+//}
+
+.view--section {
+    height: 50%;
+    position: absolute; top: 25%; right: 0; bottom: auto; left: 0;
+    padding-top: 50px;
 }
+.view--body {
+    width: 100%;
+    position: absolute; top: 100%;
+    background: #fff;
+}
+.view--title-group {
+    color: #FEFEFE;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.15);
+}
+.view--title {
+    margin: 15px 0;
+    margin-left: -0.05em;
+}
+h1.view--title {
+    font-size: 80px;
+}
+h2.view--title {
+    font-size: 30px; font-weight: 300;
+    margin-left: -0.05em;
+    color: #CDBFE3;
+}
+.view--action {
+    margin: 15px 0;
+}
+
+
 .view-enter, .view-leave {
     -ms-transition:all 1s ease;
     transition:all 1s ease;
