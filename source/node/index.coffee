@@ -95,6 +95,22 @@ module.exports= (cfg, log, done) ->
 
                     next err
 
+        maria.transaction= () ->
+            (req, res, next) ->
+                req.maria.query 'SET sql_mode="STRICT_TRANS_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE"', (err) ->
+                    return next err if err
+                    req.maria.query 'START TRANSACTION', (err) ->
+                        req.maria.transaction= true if not err
+                        return next err
+
+        maria.transaction.commit= () ->
+            (req, res, next) ->
+                return do next if not req.maria.transaction
+                req.maria.query 'COMMIT', (err) ->
+                    return next err
+
+        maria.Player= require './models/Player'
+
         maria.Server= require './models/Server'
         maria.Server.Storage= require './models/Server/Storage'
         maria.Server.Storage.Item= require './models/Server/Storage/Item'
