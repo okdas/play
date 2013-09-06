@@ -1,4 +1,4 @@
-app= angular.module 'app', ['ngAnimate', 'ngRoute', 'ngResource'], ($routeProvider) ->
+app= angular.module 'app', ['ngRoute', 'ngResource', 'ngAnimate'], ($routeProvider) ->
 
     $routeProvider.when '/',
         templateUrl: 'partials/', controller: 'PlayCtrl'
@@ -154,12 +154,13 @@ app.controller 'PlayerRouteCtrl', ($scope, $rootScope, $route, Player, subscript
 
 
 
-app.controller 'PlayerPaymentsCtrl', ($scope, PlayerPayment, $log) ->
-    $scope.state= null
+app.controller 'PlayerPaymentsCtrl', ($scope, $rootScope, PlayerPayment, $log) ->
+    $rootScope.route= 'player'
     $scope.payments= PlayerPayment.query () ->
         $scope.state= 'ready'
 
-app.controller 'PlayerPaymentCtrl', ($scope, $routeParams, PlayerPayment, $log) ->
+app.controller 'PlayerPaymentCtrl', ($scope, $rootScope, $routeParams, PlayerPayment, $log) ->
+    $rootScope.route= 'player'
     $scope.state= null
     $scope.payment= PlayerPayment.get $routeParams, () ->
         $scope.state= 'ready'

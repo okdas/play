@@ -447,35 +447,36 @@ table {
 }
 
 
-.animate .dialog-show,
-.animate .dialog-hide {
-    transition:all .5s ease;
-    -moz-transition:all ease .5s;
+.animate .dialog.ng-enter,
+.animate .dialog.ng-leave {
+    transition: all .5s ease;
+    -moz-transition: all ease .5s;
 }
-    .animate .dialog-show,
-    .animate .dialog-hide.dialog-hide-active {
-        opacity:0;
-        -webkit-transform:scale(1.5);
-        //transform:scale(1.5);
+    .animate .dialog.ng-enter,
+    .animate .dialog.ng-leave.dialog.ng-leave-active {
+        opacity: 0;
+        transform: scale(1.5);
+        -webkit-transform: scale(1.5);
     }
-    .animate .dialog-hide,
-    .animate .dialog-show.dialog-show-active {
-        opacity:1;
-        -webkit-transform:scale(1);
-        //transform:scale(1);
+    .animate .dialog.ng-leave,
+    .animate .dialog.ng-enter.dialog.ng-enter-active {
+        opacity: 1;
+        transform: scale(1);
+        -webkit-transform: scale(1);
+        -moz-transition: all ease .5s;
     }
 
-.animate .dialog-overlay-enter,
-.animate .dialog-overlay-leave {
-    transition:all .5s ease;
+.animate .dialog-overlay.ng-enter,
+.animate .dialog-overlay.ng-leave {
+    transition: all .5s ease;
 }
-    .animate .dialog-overlay-enter,
-    .animate .dialog-overlay-leave.dialog-overlay-leave-active {
-        opacity:0;
+    .animate .dialog-overlay.ng-enter,
+    .animate .dialog-overlay.ng-leave.dialog-overlay.ng-leave-active {
+        opacity: 0;
     }
-    .animate .dialog-overlay-leave,
-    .animate .dialog-overlay-enter.dialog-overlay-enter-active {
-        opacity:1;
+    .animate .dialog-overlay.ng-leave,
+    .animate .dialog-overlay.ng-enter.dialog-overlay.ng-enter-active {
+        opacity: 1;
     }
 
 html {

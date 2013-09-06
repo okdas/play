@@ -1,4 +1,4 @@
-app= angular.module 'app', ['ngResource', 'ngRoute'], ($routeProvider) ->
+app= angular.module 'app', ['ngResource', 'ngRoute', 'ngAnimate'], ($routeProvider) ->
 
     $routeProvider.when '/',
         templateUrl: 'partials/', controller: 'WelcomeCtrl'
