@@ -16,7 +16,8 @@
   },
   "scripts": {
     "start": "grunt && node app/node.js",
-    "install": "grunt"
+    "install": "grunt",
+    "postinstall": "cd app && npm install"
   },
   "devDependencies": {
     "grunt": "0.4.1",
