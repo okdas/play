@@ -5,12 +5,7 @@ app= angular.module 'app', ['ngRoute', 'ngResource', 'ngAnimate'], ($routeProvid
 
 
     $routeProvider.when '/player',
-        templateUrl: 'partials/player/', controller: 'PlayerRouteCtrl', resolve:
-            subscriptionList: ($q, Subscription) ->
-                dfd= do $q.defer
-                Subscription.query (subscriptions) ->
-                    dfd.resolve subscriptions
-                dfd.promise
+        templateUrl: 'partials/player/', controller: 'PlayerCtrl'
 
     $routeProvider.when '/player/payments',
         templateUrl:'partials/player/payments/', controller:'PlayerPaymentsCtrl'
@@ -148,22 +143,6 @@ app.controller 'ContactDialogCtrl', ($scope, $route, Contact) ->
 
 
 
-app.controller 'PlayerRouteCtrl', ($scope, $rootScope, $route, Player, subscriptionList) ->
-    $rootScope.route= 'player'
-    $rootScope.server= null
-
-    $scope.state= 'ready'
-
-    $scope.subscriptions= subscriptionList
-    $scope.subscribe= (subscription) ->
-        console.log 'подписаться', subscription
-        subscription.$subscribe () ->
-                console.log 'подписался'
-        ,   () ->
-                console.log 'не удалось подписаться'
-
-
-
 app.controller 'PlayerPaymentsCtrl', ($scope, $rootScope, PlayerPayment, $log) ->
     $rootScope.route= 'player'
     $scope.payments= PlayerPayment.query () ->
@@ -214,7 +193,6 @@ app.controller 'PlayerCtrl', ($scope, $rootScope, $route, Player) ->
     ,   (err) ->
             $scope.state= 'error'
             $scope.error= err
-
 
 
 
