@@ -19,7 +19,7 @@ append header
                 a(ng-href='#/storage/{{server.name}}') Склад
 
           ul.nav.navbar-nav.pull-right
-            li(ng-class="{'active':'player'==route}").dropdown
+            li(ng-if="player.$resolved", ng-class="{'active':'player'==route}").dropdown
                 a#playerDropdown(href='#/player', data-toggle='dropdown', data-target='#', onclick="return false") {{player.name}} 
                     b.caret
                 ul.dropdown-menu
