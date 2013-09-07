@@ -30,6 +30,10 @@ app.on 'mount', (parent) ->
             maria.Player
         )
 
+    ,   loadPlayerPex(
+            maria.Player.Pex
+        )
+
     ,   (req, res) ->
 
             res.json 200, req.player
@@ -135,6 +139,13 @@ loadPlayer= (Player) ->
 
             if not err and not player
                 err= 'player not found'
+
+            return next err
+
+loadPlayerPex= (PlayerPex) ->
+    (req, res, next) ->
+        PlayerPex.getByPlayerName req.player.name, req.maria, (err, pex) ->
+            req.player.pex= pex
 
             return next err
 
