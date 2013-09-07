@@ -30,9 +30,33 @@ app.on 'mount', (parent) ->
             maria.Player
         )
 
+    ,   loadPlayerPex(
+            maria.Player.Pex
+        )
+
     ,   (req, res) ->
 
             res.json 200, req.player
+
+
+
+    ###
+    Обновляет данные pex аутентифицированного игрока.
+    ###
+    app.post '/pex'
+    ,   access
+
+    ,   maria(
+            app.get 'db'
+        )
+
+    ,   updatePlayerPex(
+            maria.Player.Pex
+        )
+
+    ,   (req, res) ->
+
+            res.json 200, req.user.pex
 
 
 
@@ -135,6 +159,47 @@ loadPlayer= (Player) ->
 
             if not err and not player
                 err= 'player not found'
+
+            return next err
+
+loadPlayerPex= (PlayerPex) ->
+    (req, res, next) ->
+        PlayerPex.getByPlayerName req.player.name, req.maria, (err, pex) ->
+            req.player.pex= pex
+
+            if not err
+                pex.title= ''
+                if prefix= req.player.pex.prefix
+                    pex.title= pex.title + prefix
+                pex.title= pex.title + req.player.name
+                if suffix= req.player.pex.suffix
+                    pex.title= pex.title + suffix
+
+            return next err
+
+updatePlayerPex= (PlayerPex) ->
+    (req, res, next) ->
+        pex= new PlayerPex req.body
+
+        if req.body.prefixColor? and req.body.playerColor?
+            pex.prefix= ''
+            if req.body.prefixTitle
+                pex.prefix= pex.prefix + req.body.prefixColor
+                pex.prefix= pex.prefix + '[' + req.body.prefixTitle + ']'
+            pex.prefix= pex.prefix + req.body.playerColor
+            if req.body.prefixTitle
+                pex.prefix= pex.prefix + ' '
+        else
+            delete pex.prefix
+
+        if req.body.suffixColor?
+            pex.suffix= ''
+            pex.suffix= req.body.suffixColor + ':'
+        else
+            delete pex.suffix
+
+        PlayerPex.updateByPlayerName req.user.name, pex, req.maria, (err, pex) ->
+            req.user.pex= pex
 
             return next err
 

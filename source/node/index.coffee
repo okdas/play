@@ -110,6 +110,7 @@ module.exports= (cfg, log, done) ->
                     return next err
 
         maria.Player= require './models/Player'
+        maria.Player.Pex= require './models/Player/Pex'
         maria.Player.Message= require './models/Player/Message'
 
         maria.Server= require './models/Server'
