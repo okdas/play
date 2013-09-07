@@ -113,15 +113,26 @@ legend {
 }
 
 .input, .btn {
-    padding:11px 14px;
-    font:inherit; line-height:normal; color:#333;
-    border-radius:1px;
+    padding: 11px 14px;
+    font: inherit; line-height: normal; color: #333;
+    border-radius: 1px;
 }
 .form-large .input, .form-large .btn, .input-large, .btn-large {
-    padding:15px 18px;
-    font-size:18px;
+    padding: 15px 18px;
+    font-size: 18px;
 }
-
+.form-small .input, .form-small .btn, .input-small, .btn-small {
+    padding: 4px 9px;
+    line-height: 20px;
+}
+.form-small .input-label,
+.input-label-small {
+    margin: 0;
+    padding: 5px 0;
+    line-height: 20px;
+    font-weight: 400;
+    color: #357EBD;
+}
 select {
     max-height:40px;
 }
@@ -141,7 +152,7 @@ select {
         color:#333;
         box-shadow:inset 0 1px 1px rgba(0,0,0, 0.075);
     }
-    input.ng-valid {
+    .input.ng-valid {
         color:#357ebd;
         border-color:rgba(82,168,236, .8);
     }
@@ -423,6 +434,11 @@ table {
         margin-bottom: 20px;
         font-size: 1.5em; line-height: 1.5em;
         text-align: center;
+    }
+
+    &--acts {
+        padding: 50px 0 0;
+        border-top: 1px solid #EEE;
     }
 }
     .dialog-bg {
