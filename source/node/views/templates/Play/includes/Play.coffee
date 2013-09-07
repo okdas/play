@@ -34,6 +34,10 @@ app.factory 'Player', ($resource) ->
         login: {method:'post', params:{action:'login'}}
         logout: {method:'post', params:{action:'logout'}}
 
+app.factory 'PlayerPex', ($resource) ->
+    $resource '/api/v1/player/pex', {},
+        update: {method:'post'}
+
 
 app.factory 'PlayerPayment', ($resource) ->
     $resource '/api/v1/player/payments/:paymentId', {paymentId:'@id'},
@@ -87,6 +91,7 @@ app.controller 'ViewCtrl', ($scope, $rootScope, $location, $window, Player, Serv
         state: null
 
     $rootScope.showViewDialog= (type) ->
+        $rootScope.view.dialog.error= null
         $rootScope.view.dialog.state= 'none'
         $rootScope.view.dialog.overlay= type or true
 
@@ -184,7 +189,7 @@ app.factory 'ServerStorageItem', ($resource) ->
 
 
 
-app.controller 'PlayerCtrl', ($scope, $rootScope, $route, Player) ->
+app.controller 'PlayerCtrl', ($scope, $rootScope, $route, Player, PlayerPex) ->
     $rootScope.route= 'player'
     $rootScope.server= null
 
@@ -194,6 +199,186 @@ app.controller 'PlayerCtrl', ($scope, $rootScope, $route, Player) ->
             $scope.state= 'error'
             $scope.error= err
 
+    $scope.showPexDialog= () ->
+        $scope.showViewDialog 'pex'
+
+    $scope.updatePex= (data) ->
+        PlayerPex.update data, () ->
+                console.log 'обновилось'
+        ,   () ->
+
+
+
+app.controller 'PlayerPexDialogCtrl', ($scope, PlayerPex) ->
+    $scope.colors= [
+        {token:'&0', hex:'#000000'}
+        {token:'&1', hex:'#0000AA'}
+        {token:'&2', hex:'#00AA00'}
+        {token:'&3', hex:'#00AAAA'}
+        {token:'&4', hex:'#AA0000'}
+        {token:'&5', hex:'#AA00AA'}
+        {token:'&6', hex:'#FFAA00'}
+        {token:'&7', hex:'#AAAAAA'}
+        {token:'&8', hex:'#555555'}
+        {token:'&9', hex:'#5555FF'}
+        {token:'&a', hex:'#55FF55'}
+        {token:'&b', hex:'#55FFFF'}
+        {token:'&c', hex:'#FF5555'}
+        {token:'&d', hex:'#FF55FF'}
+        {token:'&e', hex:'#FFFF55'}
+        {token:'&f', hex:'#FFFFFF'}
+    ]
+    $scope.pex= new PlayerPex
+
+    matchPrefixColor= (prefix) ->
+        color= (prefix.match /^(&[0-9a-f]{1})/)[1]
+        color
+
+    matchPrefixTitle= (prefix) ->
+        title= prefix.replace /&[0-9a-f]{1}/g, ''
+        title= (title.match /([0-9A-Za-z]+)/)[1]
+        title
+
+    matchPlayerColor= (prefix) ->
+        color= (prefix.match /(&[0-9a-f]{1})\s{1}$/)[1]
+        color
+
+    matchSuffixColor= (suffix) ->
+        color= (suffix.match /^(&[0-9a-f]{1})/)[1]
+        color
+
+    matchPrefix= (pex, prefix) ->
+        pex.prefixColor= matchPrefixColor prefix
+        pex.prefixTitle= matchPrefixTitle prefix
+        pex.playerColor= matchPlayerColor prefix
+
+    matchSuffix= (pex, suffix) ->
+        pex.suffixColor= matchSuffixColor suffix
+
+    matchPrefix $scope.pex, $scope.player.pex.prefix
+    matchSuffix $scope.pex, $scope.player.pex.suffix
+
+    $scope.selectPrefixColor= (c) ->
+        $scope.pex.prefixColor= c.token
+
+    $scope.selectPlayerColor= (c) ->
+        $scope.pex.playerColor= c.token
+
+    $scope.selectSuffixColor= (c) ->
+        $scope.pex.suffixColor= c.token
+
+    $scope.$watch 'pex', (pex) ->
+        prefix= ''
+        if pex.prefixColor? and pex.playerColor?
+            prefix= ''
+            if pex.prefixTitle
+                prefix= prefix + pex.prefixColor
+                prefix= prefix + '[' + pex.prefixTitle + ']'
+            prefix= prefix + pex.playerColor
+            if pex.prefixTitle
+                prefix= prefix + ' '
+            prefix= prefix + $scope.player.name
+        suffix= ''
+        if pex.suffixColor?
+            suffix= ''
+            suffix= pex.suffixColor + ':'
+        $scope.player.pex.title= prefix + suffix
+    ,   true
+
+    $scope.save= () ->
+        $scope.view.dialog.state= 'busy'
+        PlayerPex.save $scope.pex, (pex) ->
+                matchPrefix $scope.pex, $scope.pex.prefix
+                matchSuffix $scope.pex, $scope.pex.suffix
+                $scope.player.pex.prefix= $scope.pex.prefix
+                $scope.player.pex.suffix= $scope.pex.suffix
+                $scope.view.dialog.state= 'done'
+                do $scope.hideViewDialog
+        ,   (err) ->
+                $scope.view.dialog.state= 'fail'
+                $scope.view.dialog.error= err
+
+
+app.directive 'bPlayerPex', ($parse) ->
+
+    renderToken= (e, token) ->
+        switch token
+            when '&0'
+                e= $ '<span>'
+                e.attr 'style', "color:#000000;"
+            when '&1'
+                e= $ '<span>'
+                e.attr 'style', "color:#0000AA;"
+            when '&2'
+                e= $ '<span>'
+                e.attr 'style', "color:#00AA00;"
+            when '&3'
+                e= $ '<span>'
+                e.attr 'style', "color:#00AAAA;"
+            when '&4'
+                e= $ '<span>'
+                e.attr 'style', "color:#AA0000;"
+            when '&5'
+                e= $ '<span>'
+                e.attr 'style', "color:#AA00AA;"
+            when '&6'
+                e= $ '<span>'
+                e.attr 'style', "color:#FFAA00;"
+            when '&7'
+                e= $ '<span>'
+                e.attr 'style', "color:#AAAAAA;"
+            when '&8'
+                e= $ '<span>'
+                e.attr 'style', "color:#555555;"
+            when '&9'
+                e= $ '<span>'
+                e.attr 'style', "color:#5555FF;"
+            when '&a'
+                e= $ '<span>'
+                e.attr 'style', "color:#55FF55;"
+            when '&b'
+                e= $ '<span>'
+                e.attr 'style', "color:#55FFFF;"
+            when '&c'
+                e= $ '<span>'
+                e.attr 'style', "color:#FF5555;"
+            when '&d'
+                e= $ '<span>'
+                e.attr 'style', "color:#FF55FF;"
+            when '&e'
+                e= $ '<span>'
+                e.attr 'style', "color:#FFFF55;"
+            when '&f'
+                e= $ '<span>'
+                e.attr 'style', "color:#FFFFFF;"
+            else
+                e= $ '<span>' if not e
+                e.append token
+        e
+
+    renderTitle= ($e, title, content) ->
+        e= null
+        title= title.split /(&[0-9a-f]{1})/
+        for token in title
+            e= renderToken e, token
+            $e.append e
+        e.append ' ' + content
+        e
+
+    return {
+        restrict: 'A'
+        link: ($scope, $e, $a) ->
+            getPlayerPex= $parse $a.bPlayerPex
+            pex= getPlayerPex $scope
+
+            content= $a.content or ''
+
+            renderTitle $e, pex.title, content
+            $scope.$watch $a.bPlayerPex, (pex) ->
+                $e.html ''
+                renderTitle $e, pex.title, content
+            ,   true
+    }
 
 
 

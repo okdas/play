@@ -16,4 +16,109 @@ block section-side
 block section-body
     .row
         .col-12.player--payments
-            b обычный игрок
+            p Полномочия: {{player.subscription}}
+                b обычный игрок
+            p Разрешения: {{player.pex.groups}}
+
+            p Цвет персонажа: 
+                a(href='', ng-click="showPexDialog()")
+                    b(b-player-pex="player.pex", content="текст сообщения в чате...")
+
+
+append dialog
+    .pex-dialog(ng-if="'pex'==view.dialog.overlay", ng-controller="PlayerPexDialogCtrl")
+        .row: .col-12.dialog--head(ng-class="{'primary':'none'==view.dialog.state}")
+            i.icon-adjust
+            span  Цвет персонажа в игре
+
+        .row: .col-12.dialog--body
+            form.form-small(name='form')
+
+                .row: .col-12.col-sm-12.col-lg-10.col-offset-1
+
+                    h2.dialog--title
+                        b(b-player-pex="player.pex", content="текст сообщения в чате...")
+
+                    fieldset
+                        .row
+                            .col-4
+                                label.input-label Приставка
+                            .col-8
+                                input.input.input-small(name='prefixTitle', ng-model="pex.prefixTitle", ng-pattern="/[0-9A-Za-z]/")
+                        .row
+                            .col-4
+                                label.input-label Цвет приставки
+                            .col-8
+                                -//select(name='prefixColor', ng-model="pex.prefixColor", required)
+                                -//    option(ng-repeat="c in colors", style="background:{{c.hex}};") {{c.token}}
+                                style.
+                                    .input-thumbnails {
+                                        display: block;
+                                        width: 100%;
+                                    } .input-thumbnails--inner {
+                                        margin-right: -5px;
+                                    }
+                                    .input-thumbnails .input-thumbnail {
+                                        display: block; float: left;
+                                        width: 12.5%;
+                                        padding: 0 5px 5px 0;
+                                    }
+                                    .input-thumbnails .input {
+                                        margin: 0;
+                                        padding: 4px;
+                                    }
+                                    .input-thumbnails .input-radio:not(:first-child) {
+                                    }
+                                    .input-thumbnails .input-radio.input-small {
+                                    }
+                                    .input-radio--btn {
+                                        width: 100%; height: 15px;
+                                        opacity: .15;
+                                    }   .input-radio.ng-valid .input-radio--btn,
+                                        .input-radio:hover .input-radio--btn {
+                                            opacity: 1;
+                                        }
+                                    fieldset {
+                                        margin: 0;
+                                        padding: 14px 0 10px;
+                                        border-top: 1px solid #EEE;
+                                    }
+                                    .dialog--title {
+                                        margin: 0;
+                                        margin-bottom: 50px;
+                                    }
+                                    .dialog--acts {
+                                        padding-top: 35px;
+                                    }
+                                .input-thumbnails: .input-thumbnails--inner
+                                    .input-thumbnail(ng-repeat="c in colors")
+                                        .input.input-radio.input-small(ng-click="selectPrefixColor(c)", ng-class="{'ng-valid':c.token==pex.prefixColor}")
+                                            .input-radio--btn(style="background:{{c.hex}};")
+                                    .clearfix
+                    fieldset
+                        .row
+                            .col-4
+                                label.input-label Цвет ника
+                            .col-8
+                                .input-thumbnails: .input-thumbnails--inner
+                                    .input-thumbnail(ng-repeat="c in colors")
+                                        .input.input-radio.input-small(ng-click="selectPlayerColor(c)", ng-class="{'ng-valid':c.token==pex.playerColor}")
+                                            .input-radio--btn(style="background:{{c.hex}};")
+                                    .clearfix
+
+                    fieldset
+                        .row
+                            .col-4
+                                label.input-label Цвет чата
+                            .col-8
+                                .input-thumbnails: .input-thumbnails--inner
+                                    .input-thumbnail(ng-repeat="c in colors")
+                                        .input.input-radio.input-small(ng-click="selectSuffixColor(c)", ng-class="{'ng-valid':c.token==pex.suffixColor}")
+                                            .input-radio--btn(style="background:{{c.hex}};")
+                                    .clearfix
+
+                .row: .col-12.col-sm-12.col-lg-10.col-offset-1
+                    .dialog--acts
+                        button.btn.btn-primary.pull-right(ng-click="save(pex)", ng-disabled="form.prefixTitle.$invalid || view.dialog.state=='busy'")
+                            i.icon-adjust
+                            span  Сохранить настройки цвета
