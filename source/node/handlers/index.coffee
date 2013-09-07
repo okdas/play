@@ -86,3 +86,13 @@ app.on 'mount', (parent) ->
     ###
     app.use '/api/v1/player/messages'
     ,   require './Play/Api/V1/Player/Messages'
+
+
+    ###
+    Обрабатывает ошибку
+    ###
+    app.use (err, req, res, next) ->
+        res.status 500
+        res.json
+            name: err.name
+            message: err.message

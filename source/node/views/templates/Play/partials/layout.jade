@@ -1,36 +1,42 @@
-section.view-inner.view-inner-ready(ng-if='"ready"==state'): block section
+block view
 
-    .container: block section-container
+    block view-ready
+        .view-inner.view-inner-ready(ng-if='"ready"==state'): block section
 
-        .row
-            .col-12.section-head
-                block section-head
+            .container: block section-container
 
-                    h1.section-head-title
-                        block section-head-title
+                .row
+                    .col-12.section-head
+                        block section-head
 
-                    nav.section-head-nav
-                        block section-head-nav
+                            h1.section-head-title
+                                block section-head-title
 
-                    nav.section-head-nav.pull-right
-                        ul.nav.nav-row
-                            li
-                                a(href='', ng-click="showPlayerPaymentDialog()") {{player.balance | currency:'₨'}}
+                            nav.section-head-nav
+                                block section-head-nav
 
-        .row
-            .col-12.col-sm-12.col-lg-3
-                block section-side
+                            nav.section-head-nav.pull-right
+                                ul.nav.nav-row
+                                    li
+                                        a(href='', ng-click="showPlayerPaymentDialog()") {{player.balance | currency:'₨'}}
 
-            .col-12.col-sm-12.col-lg-9
-                block section-body
+                .row
+                    .col-12.col-sm-12.col-lg-3
+                        block section-side
 
-    .dialog(ng-if="view.dialog.overlay")
-        .dialog-bg(ng-click='hideViewDialog()')
-        .container: .row: .col-12.dialog-container: block dialog
-    .dialog-overlay(ng-if="view.dialog.overlay")
+                    .col-12.col-sm-12.col-lg-9
+                        block section-body
 
+            .dialog(ng-if="view.dialog.overlay")
+                .dialog-bg(ng-click='hideViewDialog()')
+                .container: .row: .col-12.dialog-container: block dialog
+            .dialog-overlay(ng-if="view.dialog.overlay")
 
-section.view-inner.view-inner-error(ng-if='"error"==state'): block error
-    .container
-        .row
-            .col-12 Ошибка! {{error}}
+    block view-error
+        .view-inner.view-inner-error(ng-if='"error"==state'): block error
+            .view--section
+                .container
+                    .row: .col-12
+                        hgroup.view--title-group
+                            h1.view--title {{error.status}} {{error.data.name}}
+                            h2.view--title {{error.data.message}}

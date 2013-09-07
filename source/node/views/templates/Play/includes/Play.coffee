@@ -35,6 +35,7 @@ app= angular.module 'app', ['ngRoute', 'ngResource', 'ngAnimate'], ($routeProvid
 
 app.factory 'Player', ($resource) ->
     $resource '/api/v1/player/:action', {},
+        get: {method:'get', timeout:7000}
         login: {method:'post', params:{action:'login'}}
         logout: {method:'post', params:{action:'logout'}}
 
@@ -102,11 +103,20 @@ app.controller 'ViewCtrl', ($scope, $rootScope, $location, $window, Player, Serv
         $scope.showDialog 'payment'
 
 
-app.controller 'PlayCtrl', ($scope, $rootScope, $route) ->
+app.controller 'PlayCtrl', ($scope, $rootScope, $route, $q) ->
     $rootScope.route= 'play'
     $rootScope.server= null
 
-    $scope.state= 'ready'
+    $scope.state= null
+
+    promise= $q.all
+        player: $rootScope.player.$promise
+    promise.then () ->
+            $scope.state= 'ready'
+    ,   (error) ->
+            $scope.state= 'error'
+            $scope.error= error
+
     $scope.showContactDialog= () ->
         $scope.showDialog 'contact'
 
@@ -203,9 +213,7 @@ app.controller 'PlayerCtrl', ($scope, $rootScope, $route, Player) ->
             $scope.state= 'ready'
     ,   (err) ->
             $scope.state= 'error'
-            $scope.error=
-                error: err
-                title: 'Не удалось загрузить пользователя'
+            $scope.error= err
 
 
 
@@ -223,6 +231,7 @@ app.controller 'StoreCtrl', ($scope, $rootScope, $q, $log) ->
             $scope.state= 'ready'
     ,   (error) ->
             $scope.state= 'error'
+            $scope.error= error
 
 
 
@@ -242,8 +251,13 @@ app.controller 'StoreServerCtrl', ($scope, $rootScope, $q, $routeParams, ServerS
             ,   (store) ->
                     $scope.store= store
                     $scope.state= 'ready'
+            ,   (err) ->
+                    $scope.state= 'error'
+                    $scope.error= err
+
     ,   (error) ->
             $scope.state= 'error'
+            $scope.error= error
 
 
 
@@ -262,6 +276,7 @@ app.controller 'StorageCtrl', ($scope, $rootScope, $q, $log) ->
             $scope.state= 'ready'
     ,   (error) ->
             $scope.state= 'error'
+            $scope.error= error
 
 
 
@@ -282,8 +297,13 @@ app.controller 'StorageServerCtrl', ($scope, $rootScope, $q, $routeParams, Serve
             ,   (storage) ->
                     $scope.storage= $rootScope.server.storage= storage
                     $scope.state= 'ready'
+            ,   (err) ->
+                    $scope.state= 'error'
+                    $scope.error= err
+
     ,   (error) ->
             $scope.state= 'error'
+            $scope.error= error
 
 
 
