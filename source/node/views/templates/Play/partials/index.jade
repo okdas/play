@@ -1,8 +1,12 @@
-.view-inner(ng-if="'ready'==state")
-    section.view--section: block section
-        .container
-            .row: .col-12
-                hgroup.view--title-group
-                    h1.view--title Streamcraft
-                        sup 2
-                    button.view--action.btn.btn-lg.btn-outline.btn-outline-inverse(ng-click="showContactDialog()") Написать разработчикам
+extends layout
+
+block view-ready
+
+    .view-inner(ng-if="'ready'==state")
+        section.view--section: block section
+            .container
+                .row: .col-12
+                    hgroup.view--title-group
+                        h1.view--title Streamcraft
+                            sup 2
+                        button.view--action.btn.btn-lg.btn-outline.btn-outline-inverse(ng-click="showContactDialog()") Написать разработчикам
