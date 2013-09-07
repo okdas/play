@@ -17,6 +17,7 @@ module.exports= class Server
             "
         ,   [@table]
         ,   (err, rows) =>
+                servers= null
 
                 if not err
                     servers= []
@@ -38,8 +39,8 @@ module.exports= class Server
             "
         ,   [@table, serverId]
         ,   (err, rows) ->
-
                 server= null
+
                 if not err
                     server= rows[0] or null
 
