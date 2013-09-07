@@ -4,6 +4,10 @@ module.exports= class Pex
     @tableEntity: 'pex_entity'
     @tableInheritance: 'pex_inheritance'
 
+    constructor: (data) ->
+        @prefix= data.prefix if data.prefix?
+        @suffix= data.suffix if data.suffix?
+
     @getByPlayerName: (playerName, maria, done) ->
         maria.query "
             SELECT
@@ -30,5 +34,26 @@ module.exports= class Pex
 
                 if not err
                     pex= rows[0]
+
+                done err, pex
+
+    @updateByPlayerName: (playerName, pex, maria, done) ->
+        pex= new @ pex if not (pex instanceof @)
+
+        maria.query "
+            UPDATE
+                ?? as PexEntity
+               SET
+                ?
+             WHERE
+                PexEntity.type = 1
+               AND
+                PexEntity.name = ?
+            "
+        ,   [@tableEntity, pex, playerName]
+        ,   (err, res) ->
+
+                if not err and res.affectedRows != 1
+                    err= 'pex update error'
 
                 done err, pex
