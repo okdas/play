@@ -1,3 +1,45 @@
+mixin ItemImage
+    img.item--image(width='50', height='50', ng-src='{{item.imageUrl}}')
+
+
+mixin ItemTitle
+    span.item--title
+        if !block
+            span.title {{item.titleRu}}
+            span.subtitle ({{item.titleEn}})
+            br
+            +ItemTitleDetails()
+        else
+            block
+
+
+mixin ItemTitleDetails
+    span.item--details
+        if !block
+            span.details--label №:
+                strong.details--value {{item.material}}
+        else
+            block
+
+
+mixin ItemPrice
+    span.item--title(style='display:block; text-align:right;')
+        if !block
+            span.price {{item.price | currency:'₨'}}
+            br
+            +ItemPriceDetails()
+        else
+            block
+
+
+mixin ItemPriceDetails
+    span.item--details
+        span.details--label за
+            strong {{item.amount}} шт
+
+
+
+
 block view
 
     block view-ready
