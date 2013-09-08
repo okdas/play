@@ -189,7 +189,7 @@ app.factory 'ServerStorageItem', ($resource) ->
 
 
 
-app.controller 'PlayerCtrl', ($scope, $rootScope, $route, Player, PlayerPex) ->
+app.controller 'PlayerCtrl', ($scope, $rootScope, $route, Player, PlayerPex, $document) ->
     $rootScope.route= 'player'
     $rootScope.server= null
 
@@ -207,7 +207,68 @@ app.controller 'PlayerCtrl', ($scope, $rootScope, $route, Player, PlayerPex) ->
                 console.log 'обновилось'
         ,   () ->
 
+    loadImage= (url) ->
+        img= new Image
+        img.src= url
+        img.onload= () ->
+            scale= 16
 
+            srcCanvas= document.createElement 'canvas'
+            srcCanvas.width= this.width;
+            srcCanvas.height= this.height;
+
+            srcCtx= srcCanvas.getContext '2d'
+            srcCtx.drawImage this, 0, 0
+            imageData= (srcCtx.getImageData 0, 0, srcCanvas.width, srcCanvas.height).data
+
+            dstCanvas= document.createElement 'canvas'
+            dstCanvas.width= this.width * scale
+            dstCanvas.height= this.height * scale
+            dstCtx= dstCanvas.getContext '2d'
+
+            x= 0
+            y= 0
+
+            offset= 0
+            while offset < imageData.length
+
+                r= imageData[offset++]
+                g= imageData[offset++]
+                b= imageData[offset++]
+                a= imageData[offset++] / 100.0
+
+                dstCtx.fillStyle= 'rgba(' + [r, g, b, a].join(',') + ')'
+                dstCtx.fillRect x * scale, y * scale, scale, scale
+
+                x++
+                if x > 63
+                    x= 0
+                    y++
+
+            $scope.image128DataUrl= dstCanvas.toDataURL 'image/png'
+
+            img= new Image
+            img.src= $scope.image128DataUrl
+            img.onload= () ->
+                #img.scale 1.125
+                size18Canvas=
+                size18Canvas= document.createElement 'canvas'
+                size18Canvas.width= this.width * 1.125
+                size18Canvas.height= this.height * 1.125
+
+                size18Ctx= size18Canvas.getContext '2d'
+                size18Ctx.drawImage this, 0, 0, this.width * 1.125, this.height * 1.125
+
+                $scope.image144DataUrl= size18Canvas.toDataURL 'image/png'
+
+                setTimeout ->
+                    $scope.$apply ->
+                        $scope.draw3d= true
+                ,   300
+
+
+    $scope.draw3d= false
+    loadImage '/3djesus.png'
 
 app.controller 'PlayerPexDialogCtrl', ($scope, PlayerPex) ->
     $scope.colors= [
