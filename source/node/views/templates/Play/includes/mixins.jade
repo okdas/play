@@ -1,15 +1,3 @@
-extends ../layout
-
-block section-head-nav
-
-    ul.nav.nav-row
-        li(ng-repeat='srv in servers', ng-class='{active:srv.id==server.id}')
-            a(ng-href='#/store/{{srv.name}}') {{srv.title}}
-
-
-
-
-
 mixin ItemImage
     img.item--image(width='50', height='50', ng-src='{{item.imageUrl}}')
 

@@ -5,3 +5,11 @@ block section-head-nav
     ul.nav.nav-row
         li(ng-repeat='srv in servers', ng-class='{active:srv.id==server.id}')
             a(ng-href='#/storage/{{srv.name}}') {{srv.title}}
+
+
+
+
+
+mixin ItemPrice
+    span.item--title(style='display:block; text-align:right;', title="{{item.createdAt | date}}") {{item.amount}} Шт.
+        br

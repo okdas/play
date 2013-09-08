@@ -1,5 +1,5 @@
 !!!
-html(lang='ru', ng-app='app', ng-cloak)
+html(lang='ru', ng-app="app", ng-cloak)
 
 
 
@@ -22,17 +22,20 @@ html(lang='ru', ng-app='app', ng-cloak)
 
 
 
-    body(ng-controller="ViewCtrl").animate
+    body(ng-controller="ViewCtrl").animate: block body
 
+        header.header: block header
 
-        block body
+            .navbar.navbar-inverse.navbar-static-top: .container
 
-            header.header
-                block header
+                a.navbar-brand(ng-href="./")
+                    span STREAMCRAFT
 
-            section
-                block view-outer
-                    .view(ng-view)
+                .nav-collapse.collapse: block header--navbar--nav-collapse
+
+        section
+            block view-outer
+                .view(ng-view)
 
 
         block dialog

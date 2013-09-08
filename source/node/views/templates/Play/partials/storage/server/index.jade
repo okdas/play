@@ -8,11 +8,9 @@ block section-head-title
 append section-body
     .storage--server
         h3.storage--server-title Склад на сервере «{{server.title}}»
-        .server--items
-            style.
-                .item {
 
-                }
+        .server--items
+
             .item(ng-repeat='item in storage.items', ng-controller='StoreServerItemCtrl'): .row
                 .col-12.col-sm-8.col-lg-8
                     +ItemImage()
@@ -23,32 +21,4 @@ append section-body
                         +ItemTitleDetails()
                 .col-12.col-sm-4.col-lg-4
                     +ItemPrice()
-
-
-mixin ItemImage
-    img.item--image(width='50', height='50', ng-src='{{item.imageUrl}}')
-
-
-mixin ItemTitle
-    span.item--title
-        if !block
-            span.title {{item.titleRu}}
-            span.subtitle ({{item.titleEn}})
-            br
-            +ItemTitleDetails()
-        else
-            block
-
-
-mixin ItemTitleDetails
-    span.item--details
-        if !block
-            span.details--label №:
-                strong.details--value {{item.material}}
-        else
-            block
-
-
-mixin ItemPrice
-    span.item--title(style='display:block; text-align:right;', title="{{item.createdAt | date}}") {{item.amount}} Шт.
-        br
+                        span.amount {{item.amount}} шт.

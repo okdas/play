@@ -9,8 +9,6 @@ block section-head-nav
     ul.nav.nav-row
         li: a(href='#/player/payments') Пожертвования
 
-block section-side
-    button.btn.btn-block.btn-primary(ng-click="showPlayerPaymentDialog()") Пожертвовать проекту
 
 
 block section-body
@@ -23,6 +21,25 @@ block section-body
             p Цвет персонажа: 
                 a(href='', ng-click="showPexDialog()")
                     b(b-player-pex="player.pex", content="текст сообщения в чате...")
+
+
+
+block section-side
+    .player--image-3d
+        .player--image-3d--head(ng-if='draw3d')
+            .player--image-3d--head--front(style="background-image:url({{image128DataUrl}})")
+            .player--image-3d--head--right(style="background-image:url({{image128DataUrl}})")
+            .player--image-3d--head--back(style="background-image:url({{image128DataUrl}})")
+            .player--image-3d--head--left(style="background-image:url({{image128DataUrl}})")
+            .player--image-3d--head--bottom(style="background-image:url({{image128DataUrl}})")
+            .player--image-3d--head--top(style="background-image:url({{image128DataUrl}})")
+            .player--image-3d--hat--front(style="background-image:url({{image144DataUrl}})")
+            .player--image-3d--hat--right(style="background-image:url({{image144DataUrl}})")
+            .player--image-3d--hat--back(style="background-image:url({{image144DataUrl}})")
+            .player--image-3d--hat--left(style="background-image:url({{image144DataUrl}})")
+            .player--image-3d--hat--bottom(style="background:none")
+            .player--image-3d--hat--top(style="background-image:url({{image144DataUrl}})")
+
 
 
 append dialog
