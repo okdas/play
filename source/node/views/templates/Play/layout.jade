@@ -1,12 +1,39 @@
 extends ../layout
 
 
+
 append head-scripts
     script(src='/scripts/libs/bootstrap/3.0.0/dropdown.js')
 
     include includes/Play.coffee
 
 
+
+block header--navbar--nav-collapse
+
+    ul.nav.navbar-nav
+
+        li(ng-class="{'active':'store'==route}")
+            a(ng-href='#/store/{{server.name}}') Магазин
+
+        li(ng-class="{'active':'storage'==route}")
+            a(ng-href='#/storage/{{server.name}}') Склад
+
+    ul.nav.navbar-nav.pull-right
+        li(ng-if="player.$resolved", ng-class="{'active':'player'==route}").dropdown
+
+            a#playerDropdown(href='#/player', data-toggle='dropdown', data-target='#', onclick="return false") {{player.name}} 
+                b.caret
+            ul.dropdown-menu
+                li: a(href='#/player') Личный кабинет
+                li: a(href='', ng-click="logout()") Выход
+
+
+
 append dialog-container
-    section(ng-if="'contact'==dialog.overlay"): include partials/contact/dialog/index
-    section(ng-if="'payment'==dialog.overlay"): include partials/player/payments/payment/dialog/index
+
+    section(ng-if="'contact'==dialog.overlay")
+        include partials/contact/dialog/index
+
+    section(ng-if="'payment'==dialog.overlay")
+        include partials/player/payments/payment/dialog/index
