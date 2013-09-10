@@ -776,3 +776,46 @@ app.directive 'bDropdown', () ->
     ($scope, $e, $a) ->
         $e.attr 'data-target', '#'
         do $e.dropdown
+
+
+
+app.directive 'bStoreTags', ($parse, $compile) ->
+    directive=
+        scope: false
+        transclude: true
+        compile: ($e, $a, transclude) ->
+            ($scope, $e, $a) ->
+                $scope.tags= $parse($a.bStoreTags)($scope)
+
+                transclude $scope, ($el) ->
+                    $elm= $ '<li class="nav-tag" ng-repeat="tag in tags" b-store-tag="tag" ng-class="{expanded:tag.expanded}"/>'
+                    $elm.append $el
+
+                    $e.append $compile($elm)($scope)
+
+app.directive 'bStoreTag', ($parse, $compile) ->
+    directive=
+        scope: false
+        transclude: true
+        controller: ($scope) ->
+            $scope.tag.expanded= false
+            $scope.expand= () ->
+                $scope.tag.expanded= true
+                return false
+            $scope.collapse= () ->
+                $scope.tag.expanded= false
+                return false
+
+        compile: (e, a, transclude) ->
+            ($scope, $e, $a) ->
+                tag= $parse($a.bStoreTag)($scope)
+
+                transclude $scope, ($el) ->
+                    $e.append($el)
+
+                    if tag.tags
+                        $elm= $ '<ul b-store-tags="tag.tags" ng-show="tag.expanded"/>'
+                        $elm.append $el.clone()
+                        $e.append $compile($elm)($scope)
+                        $e.append $compile('<button class="nav-tag--act" ng-if="!tag.expanded" ng-click="expand()"><i class="icon-angle-right"></i></button>')($scope)
+                        $e.append $compile('<button class="nav-tag--act" ng-if="!!tag.expanded" ng-click="collapse()"><i class="icon-angle-down"></i></button>')($scope)

@@ -25,6 +25,52 @@
     }
 }
 
+.nav-tag {
+    position: relative;
+
+    & > ul {
+        margin: 0; padding: 0 0 0 15px;
+        list-style: none;
+
+        & > li {
+            display: block;
+            & > a {
+                display: block;
+                padding: 5px 15px;
+                line-height: 20px;
+                &:hover, &:focus {
+                    text-decoration: none;
+                    background-color: #EEE;
+                }
+            }
+        }
+    }
+
+    &--act {
+        display: inline-block;
+        position: absolute; top: 0; right: 0;
+
+        width: 35px;
+
+        margin: 0;
+        padding: 0;
+        line-height: 30px;
+
+        border: 0;
+        border-left: 1px solid #fff;
+
+        background: none;
+
+        &:hover, &:focus {
+            background-color: #EEE;
+        }
+    }
+
+    &.expanded > a {
+        font-weight: 700;
+    }
+}
+
 .store {
 
     &--server {
