@@ -1,3 +1,29 @@
+.nav-list {
+    margin-top: 15px;
+    margin-left: -15px;
+
+    &--header {
+        padding: 30px 15px 10px;
+    }
+
+    &--sep {
+        margin: 15px; margin-right: 0;
+        border-bottom: 1px solid #EEE;
+    }
+
+    & > li {
+        &.active a {
+            color: #333 !important;
+            text-decoration: none !important;
+        }
+    }
+
+    & > li > a {
+        padding: 5px 15px;
+        line-height: 20px;
+    }
+}
+
 .item--title, .item--price {
     line-height:32px;
 }

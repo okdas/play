@@ -1,12 +1,26 @@
 extends ../layout
 
 
+append section--side
+    ul.nav.nav-list
+        li: a(ng-href="#/store/{{server.name}}") Предметы в продаже
+        li.nav-list--sep
+        li: a(ng-href="#/store/{{server.name}}/dialy") Предмет дня
+
+        li.nav-list--header Предметы по типам
+        li: a(ng-href="#/store/{{server.name}}/blocks") Блоки
+        li: a(ng-href="#/store/{{server.name}}/materials") материалы
+
+        li.nav-list--header Предметы по тегам
+        li: a(ng-href="#/store/{{server.name}}/instruments") Инструменты
+
+
 
 append section--main
     .store--server
 
         .server--items
-            .item(ng-repeat='item in store.items', ng-controller='StoreServerItemCtrl'): .row
+            .item(ng-repeat="item in store.items", ng-controller="StoreServerItemCtrl"): .row
                 .col-12.col-sm-8.col-lg-8
                     +ItemImage()
                     +ItemTitle()
