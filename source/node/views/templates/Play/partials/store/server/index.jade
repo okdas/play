@@ -3,7 +3,7 @@ extends ../layout
 
 append section--side
     ul.nav.nav-list
-        li: a(ng-href="#/store/{{server.name}}") Предметы в продаже
+        li(ng-class="{active:!search.q}", ng-click="searchClear()"): a(ng-href="#/store/{{server.name}}") Предметы в продаже
         li.nav-list--sep
         li: a(ng-href="#/store/{{server.name}}/dialy") Предмет дня
 
@@ -19,8 +19,13 @@ append section--side
 append section--main
     .store--server
 
+        .store--server--items-search
+            .input-rich
+                input.input(placeholder='Поиск предметов', ng-model="search.q", required)
+                a.input-action(ng-show="!!search.q", ng-click="searchClear()"): i.icon-remove
+
         .server--items
-            .item(ng-repeat="item in store.items", ng-controller="StoreServerItemCtrl"): .row
+            .item(ng-repeat="item in store.items | filter:search.q", ng-controller="StoreServerItemCtrl"): .row
                 .col-12.col-sm-8.col-lg-8
                     +ItemImage()
                     +ItemTitle()

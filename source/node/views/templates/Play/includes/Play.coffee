@@ -509,6 +509,11 @@ app.controller 'StoreServerCtrl', ($scope, $rootScope, $q, $routeParams, ServerS
             $scope.state= 'error'
             $scope.error= error
 
+    $scope.search=
+        q: ''
+    $scope.searchClear= () ->
+        $scope.search.q= ''
+
 
 
 
@@ -555,6 +560,10 @@ app.controller 'StorageServerCtrl', ($scope, $rootScope, $q, $routeParams, Serve
             $scope.state= 'error'
             $scope.error= error
 
+    $scope.search=
+        q: ''
+    $scope.searchClear= () ->
+        $scope.search.q= ''
 
 
 
