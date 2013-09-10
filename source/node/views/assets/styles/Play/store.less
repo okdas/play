@@ -1,3 +1,76 @@
+.nav-list {
+    margin-top: 15px;
+    margin-left: -15px;
+
+    &--header {
+        margin-top: 15px;
+        padding: 15px 15px 10px;
+    }
+
+    &--sep {
+        margin: 15px; margin-right: 0;
+        border-bottom: 1px solid #EEE;
+    }
+
+    & > li {
+        &.active a {
+            color: #333 !important;
+            text-decoration: none !important;
+        }
+    }
+
+    & > li > a {
+        padding: 5px 15px;
+        line-height: 20px;
+    }
+}
+
+.store {
+
+    &--server {
+
+        &--items-search {
+
+            .input-rich {
+                position: relative;
+                margin: 15px 0;
+            }
+            .input-action {
+                position: absolute;
+                top: 0; right: 0;
+                height: 30px;
+                padding: 0 10px;
+                text-decoration: none;
+                .icon-remove {
+                    display: inline-block;
+                    line-height: 30px;
+                }
+            }
+
+            .input {
+                padding: 4px 10px; padding-right: 30px;
+                line-height: 20px;
+                background: rgba(0, 0, 0, 0);
+                box-shadow: inset 0 5px 5px -5px rgba(0, 0, 0, 0.1);
+                &::-webkit-input-placeholder {
+                    color: #aaa;
+                }
+                &::-moz-input-placeholder {
+                    color: #aaa;
+                }
+                &:-ms-input-placeholder {
+                    color: #aaa;
+                }
+
+                &:not(.ng-valid) {
+                    border-color: #ccc;
+                }
+            }
+        }
+
+    }
+}
+
 .item--title, .item--price {
     line-height:32px;
 }

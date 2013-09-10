@@ -189,7 +189,7 @@ app.factory 'ServerStorageItem', ($resource) ->
 
 
 
-app.controller 'PlayerCtrl', ($scope, $rootScope, $route, Player, PlayerPex, $document) ->
+app.controller 'PlayerCtrl', ($scope, $rootScope, $route, Player, PlayerPex, $timeout) ->
     $rootScope.route= 'player'
     $rootScope.server= null
 
@@ -207,23 +207,77 @@ app.controller 'PlayerCtrl', ($scope, $rootScope, $route, Player, PlayerPex, $do
                 console.log 'обновилось'
         ,   () ->
 
-    loadImage= (url) ->
+    $scope.draw3d= true
+
+    $scope.rX= -12
+    $scope.rY= -12
+
+    $scope.yes= () ->
+        $scope.rX= '-36'
+        $scope.rY= '0'
+        $timeout ->
+            $scope.$apply ->
+                $scope.rX= '18'
+                $scope.rY= '0'
+                $timeout ->
+                    $scope.$apply ->
+                        $scope.rX= '-36'
+                        $scope.rY= '0'
+                        $timeout ->
+                            $scope.$apply ->
+                                $scope.rX= '-12'
+                                $scope.rY= '-12'
+                        ,   1000
+                ,   1000
+        ,   1000
+
+    $scope.no= () ->
+        $scope.rX= '0'
+        $scope.rY= '36'
+        $timeout ->
+            $scope.$apply ->
+                $scope.rX= '0'
+                $scope.rY= '-36'
+                $timeout ->
+                    $scope.$apply ->
+                        $scope.rX= '0'
+                        $scope.rY= '18'
+                        $timeout ->
+                            $scope.$apply ->
+                                $scope.rX= '-12'
+                                $scope.rY= '-12'
+                        ,   1000
+                ,   1000
+        ,   1000
+
+
+
+app.directive 'bThreeNode', ($parse) ->
+    ($scope, $e, $a) ->
+        opts= $scope.$eval $a.bThreeNode
+        $e.addClass 'b-three-node'
+
+
+app.directive 'bThreeFace', ($parse) ->
+    ($scope, $e, $a) ->
+        opts= $scope.$eval $a.bThreeFace
+
         img= new Image
-        img.src= url
+        img.src= opts.url
         img.onload= () ->
-            scale= 16
+            scale= opts.scale
 
             srcCanvas= document.createElement 'canvas'
             srcCanvas.width= this.width;
             srcCanvas.height= this.height;
-
             srcCtx= srcCanvas.getContext '2d'
             srcCtx.drawImage this, 0, 0
-            imageData= (srcCtx.getImageData 0, 0, srcCanvas.width, srcCanvas.height).data
-
+            imageData= srcCtx.getImageData(
+                opts.left, opts.top, opts.width, opts.height
+            ).data
             dstCanvas= document.createElement 'canvas'
-            dstCanvas.width= this.width * scale
-            dstCanvas.height= this.height * scale
+            dstCanvas.width= 8 * scale
+            dstCanvas.height= 8 * scale
             dstCtx= dstCanvas.getContext '2d'
 
             x= 0
@@ -241,34 +295,12 @@ app.controller 'PlayerCtrl', ($scope, $rootScope, $route, Player, PlayerPex, $do
                 dstCtx.fillRect x * scale, y * scale, scale, scale
 
                 x++
-                if x > 63
+                if x > 7
                     x= 0
                     y++
 
-            $scope.image128DataUrl= dstCanvas.toDataURL 'image/png'
-
-            img= new Image
-            img.src= $scope.image128DataUrl
-            img.onload= () ->
-                #img.scale 1.125
-                size18Canvas=
-                size18Canvas= document.createElement 'canvas'
-                size18Canvas.width= this.width * 1.125
-                size18Canvas.height= this.height * 1.125
-
-                size18Ctx= size18Canvas.getContext '2d'
-                size18Ctx.drawImage this, 0, 0, this.width * 1.125, this.height * 1.125
-
-                $scope.image144DataUrl= size18Canvas.toDataURL 'image/png'
-
-                setTimeout ->
-                    $scope.$apply ->
-                        $scope.draw3d= true
-                ,   300
-
-
-    $scope.draw3d= false
-    loadImage '/3djesus.png'
+            url= dstCanvas.toDataURL 'image/png'
+            $e.css 'background-image', "url(#{url})"
 
 app.controller 'PlayerPexDialogCtrl', ($scope, PlayerPex) ->
     $scope.colors= [
@@ -362,56 +394,45 @@ app.controller 'PlayerPexDialogCtrl', ($scope, PlayerPex) ->
 
 app.directive 'bPlayerPex', ($parse) ->
 
+    renderTokenElement= (color) ->
+        e= $ '<span ng-click="changePlayerColor()">'
+        e.css 'color', color
+        e
+
     renderToken= (e, token) ->
         switch token
             when '&0'
-                e= $ '<span>'
-                e.attr 'style', "color:#000000;"
+                e= renderTokenElement '#000000'
             when '&1'
-                e= $ '<span>'
-                e.attr 'style', "color:#0000AA;"
+                e= renderTokenElement '#0000AA'
             when '&2'
-                e= $ '<span>'
-                e.attr 'style', "color:#00AA00;"
+                e= renderTokenElement '#00AA00'
             when '&3'
-                e= $ '<span>'
-                e.attr 'style', "color:#00AAAA;"
+                e= renderTokenElement '#00AAAA'
             when '&4'
-                e= $ '<span>'
-                e.attr 'style', "color:#AA0000;"
+                e= renderTokenElement '#AA0000'
             when '&5'
-                e= $ '<span>'
-                e.attr 'style', "color:#AA00AA;"
+                e= renderTokenElement '#AA00AA'
             when '&6'
-                e= $ '<span>'
-                e.attr 'style', "color:#FFAA00;"
+                e= renderTokenElement '#FFAA00'
             when '&7'
-                e= $ '<span>'
-                e.attr 'style', "color:#AAAAAA;"
+                e= renderTokenElement '#AAAAAA'
             when '&8'
-                e= $ '<span>'
-                e.attr 'style', "color:#555555;"
+                e= renderTokenElement '#555555'
             when '&9'
-                e= $ '<span>'
-                e.attr 'style', "color:#5555FF;"
+                e= renderTokenElement '#5555FF'
             when '&a'
-                e= $ '<span>'
-                e.attr 'style', "color:#55FF55;"
+                e= renderTokenElement '#55FF55'
             when '&b'
-                e= $ '<span>'
-                e.attr 'style', "color:#55FFFF;"
+                e= renderTokenElement '#55FFFF'
             when '&c'
-                e= $ '<span>'
-                e.attr 'style', "color:#FF5555;"
+                e= renderTokenElement '#FF5555'
             when '&d'
-                e= $ '<span>'
-                e.attr 'style', "color:#FF55FF;"
+                e= renderTokenElement '#FF55FF'
             when '&e'
-                e= $ '<span>'
-                e.attr 'style', "color:#FFFF55;"
+                e= renderTokenElement '#FFFF55'
             when '&f'
-                e= $ '<span>'
-                e.attr 'style', "color:#FFFFFF;"
+                e= renderTokenElement '#FFFFFF'
             else
                 e= $ '<span>' if not e
                 e.append token
@@ -428,6 +449,11 @@ app.directive 'bPlayerPex', ($parse) ->
 
     return {
         restrict: 'A'
+
+        controller: ($scope) ->
+            $scope.changePlayerColor= () ->
+                console.log 'changeColor'
+
         link: ($scope, $e, $a) ->
             getPlayerPex= $parse $a.bPlayerPex
             pex= getPlayerPex $scope
@@ -483,6 +509,11 @@ app.controller 'StoreServerCtrl', ($scope, $rootScope, $q, $routeParams, ServerS
             $scope.state= 'error'
             $scope.error= error
 
+    $scope.search=
+        q: ''
+    $scope.searchClear= () ->
+        $scope.search.q= ''
+
 
 
 
@@ -529,6 +560,10 @@ app.controller 'StorageServerCtrl', ($scope, $rootScope, $q, $routeParams, Serve
             $scope.state= 'error'
             $scope.error= error
 
+    $scope.search=
+        q: ''
+    $scope.searchClear= () ->
+        $scope.search.q= ''
 
 
 

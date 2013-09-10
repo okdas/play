@@ -1,12 +1,8 @@
 extends ../layout
 
 
-block section-head-nav
-    ul.nav.nav-row
-        li: a(href='#/player/payments') Пожертвования
 
-
-block section-side
+block section--side
     .player--payment-robokassa(ng-if='payment.robokassa')
         form(action='{{payment.robokassa.url}}', method='POST')
             input(type='hidden', name='MrchLogin', value='{{payment.robokassa.data.MrchLogin}}')
@@ -21,7 +17,7 @@ block section-side
             b оплачен
 
 
-block section-body
+block section--main
     .player--payment
         b.btn.btn-link.link-primary.pull-right(href='#/player/payments') Сумма:
             b {{payment.amount | currency:'руб.'}}
