@@ -1,16 +1,11 @@
 extends ../layout
 
 
-block section-head-title
-    a(href='#/storage') Добро пожаловать на склад
 
-
-append section-body
+append section--main
     .storage--server
-        h3.storage--server-title Склад на сервере «{{server.title}}»
 
         .server--items
-
             .item(ng-repeat='item in storage.items', ng-controller='StoreServerItemCtrl'): .row
                 .col-12.col-sm-8.col-lg-8
                     +ItemImage()

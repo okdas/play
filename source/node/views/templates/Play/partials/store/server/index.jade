@@ -1,18 +1,11 @@
 extends ../layout
 
 
-block section-head-title
-    a(href='#/store') Добро пожаловать в магазин
 
-
-append section-body
+append section--main
     .store--server
-        h3.store--server-title Магазин на сервере «{{server.title}}»
-        .server--items
-            style.
-                .item {
 
-                }
+        .server--items
             .item(ng-repeat='item in store.items', ng-controller='StoreServerItemCtrl'): .row
                 .col-12.col-sm-8.col-lg-8
                     +ItemImage()
@@ -23,6 +16,7 @@ append section-body
                         +ItemTitleDetails()
                 .col-12.col-sm-4.col-lg-4
                     +ItemPrice()
+
 
 
 append dialog

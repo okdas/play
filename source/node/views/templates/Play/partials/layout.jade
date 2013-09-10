@@ -42,37 +42,54 @@ mixin ItemPriceDetails
 
 block view
 
+
+
     block view-ready
-        .view-inner.view-inner-ready(ng-if='"ready"==state'): block section
+        .view-inner.view-inner-ready(ng-if='"ready"==state'): .container: block section
 
-            .container: block section-container
+            .row: .section--head.col-12: .row: block section--head
 
-                .row
-                    .col-12.section-head
-                        block section-head
+                .section--head-main.col-12.col-sm-8.col-lg-8
 
-                            h1.section-head-title
-                                block section-head-title
+                    h1.section--head--title: block section--head--title
+                        a(href='#/') Добро пожаловать
 
-                            nav.section-head-nav
-                                block section-head-nav
+                    nav.section--head--nav: block section--head--nav-main
+                        ul.section--head--nav-row.nav.nav-row: block section--head--nav-main--row
 
-                            nav.section-head-nav.pull-right
-                                ul.nav.nav-row
-                                    li
-                                        a(href='', ng-click="showPlayerPaymentDialog()") {{player.balance | currency:'₨'}}
+                .section--head-side.col-12.col-sm-4.col-lg-4
 
-                .row
-                    .col-12.col-sm-12.col-lg-3
-                        block section-side
+                    nav.section--head--nav.pull-right: block section--head--nav-side
+                        ul.section--head--nav-row.nav.nav-row: block section--head--nav-side--row
+                            li.active
+                                a.section--head-size(href='', ng-click="showPlayerPaymentDialog()") {{player.balance | currency:'₨'}}
 
-                    .col-12.col-sm-12.col-lg-9
-                        block section-body
+            .row: .section--menu.col-12: .row: block section--menu
+
+                .col-2 
+                .col-2 
+                .col-2 
+                .col-2 
+                .col-2 
+                .col-2 
+
+            .row: .section--body.col-12: .row: block section--body
+
+                    .col-12.col-sm-3.col-lg-3.col-push-9: block section--side
+
+                    .col-12.col-sm-9.col-lg-9.col-pull-3: block section--main
+
+        block view--dialog
 
             .dialog(ng-if="view.dialog.overlay")
                 .dialog-bg(ng-click='hideViewDialog()')
+
                 .container: .row: .col-12.dialog-container: block dialog
+
             .dialog-overlay(ng-if="view.dialog.overlay")
+
+
+
 
     block view-error
         .view-inner.view-inner-error(ng-if='"error"==state'): block error

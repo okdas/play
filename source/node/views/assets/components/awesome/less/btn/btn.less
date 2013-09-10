@@ -7,13 +7,26 @@
 }
 
 
-
 .btn {
-    margin: 0;
+
+    &, &-box {
+        display: inline-block;
+        margin: 0;
+        padding: 10px 0;
+        line-height: 20px;
+    }
+    &-lg {
+
+    }
+    &-box {
+        &.btn-lg {
+            padding: 15px 0;
+        }
+    }
+}
+.btn {
     padding: 11px 15px;
-    line-height: 21px;
-    font-size: 14px; font-weight: 400;
-    color:#eee;
+    color: #eee;
     cursor: pointer;
     border: 1px solid transparent;
     border-radius: 1px;
@@ -74,12 +87,13 @@
         padding-right: 0; border-right: 0;
     }
 
-    color:#aaa;
+    color: #ccc;
+
     &, & u {
         text-decoration: none;
     }
     &:hover {
-        color:#999;
+        color: #999;
         & u {
             text-decoration: underline;
         }
@@ -94,12 +108,6 @@
     }
 }
 
-.btn {
-    &-lg {
-        font-size: 18px;
-        border-radius: 1px;
-    }
-}
 
 .btn-outline {
     background: none;
@@ -167,5 +175,5 @@
 
 
 .navbar-nav > li > .btn-group {
-    
+
 }

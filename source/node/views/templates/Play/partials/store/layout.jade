@@ -1,10 +1,27 @@
 extends ../layout
 
-block section-head-nav
+
+
+block section--head--title
+    a(href='#/store')
+        span.visible-inline-sm Магазин
+        span.visible-inline-lg Добро пожаловать в магазин
+
+
+
+append section--head--nav-main--row
 
     ul.nav.nav-row
         li(ng-repeat='srv in servers', ng-class='{active:srv.id==server.id}')
             a(ng-href='#/store/{{srv.name}}') {{srv.title}}
+
+
+
+block section--body
+
+    .col-12.col-sm-3.col-lg-3: block section--side
+
+    .col-12.col-sm-9.col-lg-9: block section--main
 
 
 
