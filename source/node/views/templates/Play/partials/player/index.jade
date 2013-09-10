@@ -1,44 +1,60 @@
 extends ./layout
 
 
-block section-head-title
-    span Добро пожаловать, {{player.name}}
 
-
-block section-head-nav
-    ul.nav.nav-row
-        li: a(href='#/player/payments') Пожертвования
+block section--head--title
+    span.visible-inline-sm {{player.name}}
+    span.visible-inline-lg Добро пожаловать, {{player.name}}
 
 
 
-block section-body
-    .row
-        .col-12.player--payments
-            p Полномочия: {{player.subscription}}
-                b обычный игрок
-            p Разрешения: {{player.pex.groups}}
-
-            p Цвет персонажа: 
-                a(href='', ng-click="showPexDialog()")
-                    b(b-player-pex="player.pex", content="текст сообщения в чате...")
+prepend section--head--nav-side--row
+    li: a(href='#/player/payments') Донат
 
 
 
-block section-side
-    .player--image-3d
-        .player--image-3d--head(ng-if='draw3d')
-            .player--image-3d--head--front(style="background-image:url({{image128DataUrl}})")
-            .player--image-3d--head--right(style="background-image:url({{image128DataUrl}})")
-            .player--image-3d--head--back(style="background-image:url({{image128DataUrl}})")
-            .player--image-3d--head--left(style="background-image:url({{image128DataUrl}})")
-            .player--image-3d--head--bottom(style="background-image:url({{image128DataUrl}})")
-            .player--image-3d--head--top(style="background-image:url({{image128DataUrl}})")
-            .player--image-3d--hat--front(style="background-image:url({{image144DataUrl}})")
-            .player--image-3d--hat--right(style="background-image:url({{image144DataUrl}})")
-            .player--image-3d--hat--back(style="background-image:url({{image144DataUrl}})")
-            .player--image-3d--hat--left(style="background-image:url({{image144DataUrl}})")
-            .player--image-3d--hat--bottom(style="background:none")
-            .player--image-3d--hat--top(style="background-image:url({{image144DataUrl}})")
+block section--body
+
+    .col-12.col-sm-3.col-lg-3.col-push-9
+
+        .player--img(ng-if="draw2d") 2D
+        .player--img-three(ng-if="draw3d")
+            .player--img-three--head(style="-webkit-transform: rotateX({{rX||0}}deg) rotateY({{rY||0}}deg)")
+                .player--img-three--head--front: .three--face(b-three-face="{url:'/mario.png', top:8, left:8, width:8, height:8, scale:16}")
+                .player--img-three--head--left: .three--face(b-three-face="{url:'/mario.png', top:8, left:16, width:8, height:8, scale:16}")
+                .player--img-three--head--back: .three--face(b-three-face="{url:'/mario.png', top:8, left:24, width:8, height:8, scale:16}")
+                .player--img-three--head--right: .three--face(b-three-face="{url:'/mario.png', top:8, left:0, width:8, height:8, scale:16}")
+                .player--img-three--head--top: .three--face(b-three-face="{url:'/mario.png', top:0, left:8, width:8, height:8, scale:16}")
+                .player--img-three--head--bot: .three--face(b-three-face="{url:'/mario.png', top:0, left:16, width:8, height:8, scale:16}")
+
+                .player--img-three--hat--front.three--node: .three--face(b-three-face="{url:'/mario.png', top:8, left:40, width:8, height:8, scale:18}")
+                .player--img-three--hat--left.three--node: .three--face(b-three-face="{url:'/mario.png', top:8, left:48, width:8, height:8, scale:18}")
+                .player--img-three--hat--back.three--node: .three--face(b-three-face="{url:'/mario.png', top:8, left:56, width:8, height:8, scale:18}")
+                .player--img-three--hat--right.three--node: .three--face(b-three-face="{url:'/mario.png', top:8, left:32, width:8, height:8, scale:18}")
+                .player--img-three--hat--top.three--node: .three--face(b-three-face="{url:'/mario.png', top:0, left:40, width:8, height:8, scale:18}")
+                .player--img-three--hat--bot.three--node: .three--face.three--face-shadow
+
+        .player--menu: block player--menu
+            style.
+                .ani {
+                    margin-right: -15px;
+                    text-align: right;
+                }
+            .ani
+                a.btn.btn-link(href='', ng-click="yes()") Да
+                a.btn.btn-link(href='', ng-click="no()") Нет
+
+    .col-12.col-sm-9.col-lg-9.col-pull-3
+        .row
+            .col-12.player--header
+                .player--pex
+                    b.player--pex-title.btn-box(b-player-pex="player.pex", content=":-)", ng-click="changePlayerColor()")
+                    a.player--pex-btn.btn.btn-link.btn-lg(ng-click="showPexDialog()") ← поменять цвет
+                    a.player--pex-btn.btn.btn-link.btn-lg.pull-right(ng-click="showPexDialog()") поменять скин →
+
+                .player--subscription
+                    -//b.player--subscription-title.btn-box(title="Разрешения: {{player.pex.groups}}") {{player.subscription}} Обычный игрок
+                    -//a.player--pex-btn.btn.btn-link(ng-click="showPexDialog()") ← повысить полномочия
 
 
 
@@ -66,8 +82,6 @@ append dialog
                             .col-4
                                 label.input-label Цвет приставки
                             .col-8
-                                -//select(name='prefixColor', ng-model="pex.prefixColor", required)
-                                -//    option(ng-repeat="c in colors", style="background:{{c.hex}};") {{c.token}}
                                 style.
                                     .input-thumbnails {
                                         display: block;
