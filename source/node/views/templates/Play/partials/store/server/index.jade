@@ -9,10 +9,10 @@ append section--side
 
         li.nav-list--header Предметы по типам
         li: a(ng-href="#/store/{{server.name}}/blocks") Блоки
-        li: a(ng-href="#/store/{{server.name}}/materials") материалы
+        li: a(ng-href="#/store/{{server.name}}/materials") Материалы
 
         li.nav-list--header Предметы по тегам
-        li: a(ng-href="#/store/{{server.name}}/instruments") Инструменты
+        li(ng-repeat="tag in store.tags"): a(ng-href="#/store/{{server.name}}/{{tag.name}}") {{tag.titleRuPlural}}
 
 
 
