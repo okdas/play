@@ -281,35 +281,8 @@ loadServerStoreTags= (ServerStoreTag) ->
                 res.status 404
                 err= 'server store tags not found'
 
-            if not err
-
-                idx= req.store.tagsIdx= req.store.tagsIdx or {}
-                for t in req.store.tags
-
-                    tag= idx[t.id]
-                    if not tag
-                        tag= idx[t.id]= t
-
-                ServerStoreTag.queryByTags tags, req.maria, (err, tags) ->
-
-                    if not tags and not err
-                        res.status 404
-                        err= 'server store tags tags not found'
-
-                    if not err
-                        for t in tags
-
-                            tag= idx[t.id]
-                            if not tag
-                                tag= idx[t.id]= t
-                                req.store.tags.push tag
-
-                    next err
-
-            else
-
-                console.log 'load server store:', req.store
-                next err
+            console.log 'load server store:', req.store
+            next err
 
 loadServerStoreItem= (param, ServerStoreItem) ->
     (req, res, next) ->
