@@ -17,6 +17,9 @@
             color: #333 !important;
             text-decoration: none !important;
         }
+        & > a:hover {
+            background: transparent;
+        }
     }
 
     & > li > a {
@@ -38,10 +41,6 @@
                 display: block;
                 padding: 5px 15px;
                 line-height: 20px;
-                &:hover, &:focus {
-                    text-decoration: none;
-                    background-color: #EEE;
-                }
             }
         }
     }
@@ -62,12 +61,31 @@
         background: none;
 
         &:hover, &:focus {
-            background-color: #EEE;
+            background-color: #eee;
         }
     }
 
-    &.expanded > a {
-        font-weight: 700;
+    & > a {
+        &:hover {
+            background: transparent;
+        }
+    }
+
+    &.selected {
+        & > a {
+            color: #333 !important;
+            text-decoration: none !important;
+            background-color: #eeeeee !important;
+            //box-shadow: inset -1px 0 0 0 black;
+        }
+    }
+
+    &.expanded {
+        //box-shadow: inset -1px 0 0 0 #eee;
+        & > a {
+            font-weight: 700;
+            //box-shadow: inset -1px 0 0 0 black;
+        }
     }
 }
 

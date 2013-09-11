@@ -20,6 +20,8 @@ app= angular.module 'app', ['ngRoute', 'ngResource', 'ngAnimate'], ($routeProvid
     $routeProvider.when '/store/:server',
         templateUrl: 'partials/store/server/', controller: 'StoreServerCtrl'
 
+    $routeProvider.when '/store/:server/:tag',
+        templateUrl: 'partials/store/server/', controller: 'StoreServerCtrl'
 
     $routeProvider.when '/storage',
         templateUrl: 'partials/storage/', controller: 'StorageCtrl'
@@ -485,7 +487,26 @@ app.controller 'StoreCtrl', ($scope, $rootScope, $q, $log) ->
 
 
 
-app.controller 'StoreServerCtrl', ($scope, $rootScope, $q, $routeParams, ServerStore, $log) ->
+app.factory '$thesaurus', ($log) ->
+    $thesaurus=
+
+        link: (tags) ->
+            @mapTags tags, (tag) =>
+                if tag.tags
+                    @mapTags tag.tags, (child) ->
+                        child.ancestors= child.ancestors or []
+                        child.ancestors.push tag
+            tags
+
+        mapTags: (tags, fn) ->
+            for tag in tags
+                fn tag
+                if not tag.tags or not tag.tags.length
+                    continue
+                @mapTags tag.tags, fn
+
+
+app.controller 'StoreServerCtrl', ($scope, $rootScope, $q, $route, $routeParams, ServerStore, $log, $thesaurus) ->
     $rootScope.route= 'store'
 
     $scope.state= null
@@ -501,6 +522,20 @@ app.controller 'StoreServerCtrl', ($scope, $rootScope, $q, $routeParams, ServerS
             ,   (store) ->
                     $scope.store= store
                     $scope.state= 'ready'
+
+                    $scope.search.q= $routeParams.tag
+
+                    $scope.store.tags= $thesaurus.link $scope.store.tags
+
+                    $thesaurus.mapTags $scope.store.tags, (tag) ->
+                        if tag.name == $routeParams.tag
+                            tag.selected= true
+                            if tag.tags and tag.tags.length
+                                tag.expanded= true
+                            if tag.ancestors and tag.ancestors.length
+                                for ancestor in tag.ancestors
+                                    ancestor.expanded= true
+
             ,   (err) ->
                     $scope.state= 'error'
                     $scope.error= err
@@ -513,9 +548,6 @@ app.controller 'StoreServerCtrl', ($scope, $rootScope, $q, $routeParams, ServerS
         q: ''
     $scope.searchClear= () ->
         $scope.search.q= ''
-
-
-
 
 
 
@@ -779,26 +811,30 @@ app.directive 'bDropdown', () ->
 
 
 
-app.directive 'bStoreTags', ($parse, $compile) ->
+app.directive 'navTags', ($parse, $compile) ->
     directive=
         scope: false
         transclude: true
-        compile: ($e, $a, transclude) ->
+
+        template: """
+            <li class='nav-tag' ng-repeat="tag in tags" nav-tag="tag" ng-class="{expanded:tag.expanded, selected:tag.selected}"></li>
+        """
+
+        compile: (e, a, transclude) ->
             ($scope, $e, $a) ->
-                $scope.tags= $parse($a.bStoreTags)($scope)
+                $scope.tags= $parse($a.navTags)($scope)
 
-                transclude $scope, ($el) ->
-                    $elm= $ '<li class="nav-tag" ng-repeat="tag in tags" b-store-tag="tag" ng-class="{expanded:tag.expanded}"/>'
-                    $elm.append $el
 
-                    $e.append $compile($elm)($scope)
 
-app.directive 'bStoreTag', ($parse, $compile) ->
+app.directive 'navTag', ($parse, $compile) ->
     directive=
         scope: false
         transclude: true
+        template: """
+            <a ng-href="#/store/{{server.name}}/{{tag.name}}"> {{tag.titleRuPlural}}</a>
+        """
+
         controller: ($scope) ->
-            $scope.tag.expanded= false
             $scope.expand= () ->
                 $scope.tag.expanded= true
                 return false
@@ -808,14 +844,11 @@ app.directive 'bStoreTag', ($parse, $compile) ->
 
         compile: (e, a, transclude) ->
             ($scope, $e, $a) ->
-                tag= $parse($a.bStoreTag)($scope)
+                $scope.tag= $parse($a.navTag)($scope)
 
-                transclude $scope, ($el) ->
-                    $e.append($el)
-
-                    if tag.tags
-                        $elm= $ '<ul b-store-tags="tag.tags" ng-show="tag.expanded"/>'
-                        $elm.append $el.clone()
-                        $e.append $compile($elm)($scope)
-                        $e.append $compile('<button class="nav-tag--act" ng-if="!tag.expanded" ng-click="expand()"><i class="icon-angle-right"></i></button>')($scope)
-                        $e.append $compile('<button class="nav-tag--act" ng-if="!!tag.expanded" ng-click="collapse()"><i class="icon-angle-down"></i></button>')($scope)
+                if angular.isArray $scope.tag.tags
+                    $e.append $compile("""
+                        <button class="nav-tag--act" ng-if="!tag.expanded" ng-click="expand()"><i class="icon-angle-right"></i></button>
+                        <button class="nav-tag--act" ng-if="!!tag.expanded" ng-click="collapse()"><i class="icon-angle-down"></i></button>
+                        <ul class='nav nav-list' nav-tags="tag.tags" ng-show="!!tag.expanded">Потомки</ul>
+                    """)($scope)
