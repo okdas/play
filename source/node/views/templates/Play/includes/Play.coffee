@@ -506,7 +506,7 @@ app.factory '$thesaurus', ($log) ->
                 @mapTags tag.tags, fn
 
 
-app.controller 'StoreServerCtrl', ($scope, $rootScope, $q, $route, $routeParams, ServerStore, $log, $thesaurus) ->
+app.controller 'StoreServerCtrl', ($scope, $rootScope, $q, $route, $routeParams, ServerStore, $log, $thesaurus, $location) ->
     $rootScope.route= 'store'
 
     $scope.state= null
@@ -565,6 +565,8 @@ app.controller 'StoreServerCtrl', ($scope, $rootScope, $q, $route, $routeParams,
         q: ''
     $scope.searchClear= () ->
         $scope.search.q= ''
+        if $routeParams.tag
+            $location.path "/store/#{$routeParams.server}"
 
     $scope.search= (item) ->
         return item if not q= $scope.search.q
