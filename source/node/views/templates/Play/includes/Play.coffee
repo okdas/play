@@ -523,12 +523,13 @@ app.controller 'StoreServerCtrl', ($scope, $rootScope, $q, $route, $routeParams,
                     $scope.store= store
                     $scope.state= 'ready'
 
-                    $scope.search.q= $routeParams.tag
-
                     $scope.store.tags= $thesaurus.link $scope.store.tags
 
                     $thesaurus.mapTags $scope.store.tags, (tag) ->
                         if tag.name == $routeParams.tag
+
+                            $scope.search.q= tag.titleRuSingular
+
                             tag.selected= true
                             if tag.tags and tag.tags.length
                                 tag.expanded= true
@@ -549,6 +550,23 @@ app.controller 'StoreServerCtrl', ($scope, $rootScope, $q, $route, $routeParams,
     $scope.searchClear= () ->
         $scope.search.q= ''
 
+    $scope.search= (item) ->
+        return item if not q= $scope.search.q
+
+        q= do q.toLowerCase
+
+        return item if 0 == item.material.indexOf q
+
+        pattern= new RegExp q, 'i'
+
+        return item if pattern.test item.titleRu
+        return item if pattern.test item.titleEn
+
+        return if not item.tags
+
+        for tag in item.tags
+            return item if pattern.test tag.titleRuSingular
+            return item if pattern.test tag.titleEnSingular
 
 
 app.controller 'StorageCtrl', ($scope, $rootScope, $q, $log) ->
