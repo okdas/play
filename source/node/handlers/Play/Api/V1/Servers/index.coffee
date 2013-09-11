@@ -303,6 +303,8 @@ loadServerStoreTags= (ServerStoreTag) ->
                                 tagTag.root= false
                         if tagTags.length
                             tag.tags= tagTags
+                        else
+                            tag.tags= null
 
                 root= []
                 for t in tags
