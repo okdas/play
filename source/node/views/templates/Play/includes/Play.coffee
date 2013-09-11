@@ -523,9 +523,14 @@ app.controller 'StoreServerCtrl', ($scope, $rootScope, $q, $route, $routeParams,
                     $scope.store= store
                     $scope.state= 'ready'
 
+                    # link tags
+
                     $scope.store.tags= $thesaurus.link $scope.store.tags
 
+                    $scope.tagsIdx= {}
                     $thesaurus.mapTags $scope.store.tags, (tag) ->
+                        $scope.tagsIdx[tag.id]= tag if not $scope.tagsIdx[tag.id]
+
                         if tag.name == $routeParams.tag
 
                             $scope.search.q= tag.titleRuSingular
@@ -536,6 +541,17 @@ app.controller 'StoreServerCtrl', ($scope, $rootScope, $q, $route, $routeParams,
                             if tag.ancestors and tag.ancestors.length
                                 for ancestor in tag.ancestors
                                     ancestor.expanded= true
+
+                    # link items tags
+
+                    for item in $scope.store.items
+                        continue if not item.tags
+                        ids= item.tags.split ','
+                        tags= []
+                        for id in ids
+                            continue if not tag= $scope.tagsIdx[id]
+                            tags.push tag
+                        item.tags= tags
 
             ,   (err) ->
                     $scope.state= 'error'

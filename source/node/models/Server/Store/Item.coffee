@@ -4,11 +4,13 @@ module.exports= class ServerStoreItem
     @tableItem= 'item'
     @tableMaterial= 'bukkit_material'
 
+    @tableItemTag= 'item_tag'
+
     constructor: (data) ->
         @id= data.id
         @amount= data.amount
         @price= data.price
-        
+
         @name= data.name
 
         @titleRu= data.itemTitleRu or data.materialTitleRu
@@ -21,11 +23,13 @@ module.exports= class ServerStoreItem
 
         @enchantments= [] if @enchantability
 
+        @tags= data.tags or null
+
     @query: (serverId, maria, done) ->
         items= null
 
         maria.query "
-            SELECT
+             SELECT
 
                 Item.id,
                 Item.amount,
@@ -42,20 +46,29 @@ module.exports= class ServerStoreItem
                 Material.imageUrl as materialImageUrl,
 
                 Material.id as material,
-                Material.enchantability as enchantability
+                Material.enchantability as enchantability,
 
-            FROM
+                GROUP_CONCAT(ItemTag.tagId) as tags
+
+              FROM
                 ?? as ServerItem
-            JOIN
+              JOIN
                 ?? as Item
                 ON Item.id= ServerItem.itemId
-            JOIN
+              JOIN
                 ?? as Material
                 ON Material.id= Item.material
-            WHERE
+              LEFT OUTER JOIN
+                ?? as ItemTag
+                ON ItemTag.itemId= Item.id
+
+             WHERE
                 ServerItem.serverId = ?
+
+             GROUP BY
+                Item.id
             "
-        ,   [@table, @tableItem, @tableMaterial, serverId]
+        ,   [@table, @tableItem, @tableMaterial, @tableItemTag, serverId]
         ,   (err, rows) =>
 
                 if not err
