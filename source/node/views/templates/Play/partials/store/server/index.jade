@@ -12,7 +12,7 @@ append section--side
         li: a(ng-href="#/store/{{server.name}}/materials") Материалы
 
         li.nav-list--header Предметы по тегам
-    ul.nav.nav-list.nav-tags(nav-tags="store.tags")
+    ul.nav.nav-list.nav-tags(nav-tags="tags")
 
 
 
@@ -25,7 +25,7 @@ append section--main
                 a.input-action(ng-show="!!search.q", ng-click="searchClear()"): i.icon-remove
 
         .server--items
-            .item(ng-repeat="item in store.items | filter:search", ng-controller="StoreServerItemCtrl"): .row
+            .item(ng-repeat="item in items | filter:search", ng-controller="StoreServerItemCtrl"): .row
                 .col-12.col-sm-8.col-lg-8
                     +ItemImage()
                     +ItemTitle()
@@ -39,10 +39,10 @@ append section--main
 
 
 append dialog
-    .item-dialog(ng-if="'item'==view.dialog.overlay", ng-controller="StoreServerItemDetailsCtrl")
+    .item-dialog(ng-if="'item'==view.dialog.overlay", ng-controller="StoreServerItemDetailsCtrl", ng-init="item=view.dialog.item")
         .row: .col-12.dialog--head.info(ng-class="{'primary':'none'==orderState}")
             i.icon-share-alt
-            span  Предмет в продаже
+            span  Предмет в продаже {{item.id}}
 
         .row: .col-12.dialog--body(ng-if="'done'==orderState")
             .row: .col-12.col-sm-12.col-lg-10.col-offset-1
