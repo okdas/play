@@ -79,6 +79,9 @@ app.on 'mount', (parent) ->
     ,   loadServerStoreItemsEnchantments(
             maria.Server.Store.Item.Enchantment
         )
+    ,   loadServerStoreTags(
+            maria.Server.Store.Tag
+        )
 
     ,   (req, res) ->
 
@@ -133,9 +136,9 @@ loadServers= (Server) ->
 loadServerStorage= (param, ServerStorage) ->
     (req, res, next) ->
         req.storage= null
-        
+
         serverId= req.param param
-        
+
         console.log 'load server `%d` storage...', serverId
         ServerStorage.get serverId, req.maria, (err, storage) ->
 
@@ -261,6 +264,22 @@ loadServerStoreItemsEnchantments= (ServerStoreItemEnchantment) ->
                             itemEnch= extend {}, ench,
                                 level: itemEnch.level
                             item.enchantments.push itemEnch
+
+            console.log 'load server store:', req.store
+            next err
+
+loadServerStoreTags= (ServerStoreTag) ->
+    (req, res, next) ->
+        serverId= req.store.serverId
+
+        console.log 'load server `%s` store tags...', serverId
+
+        ServerStoreTag.query serverId, req.maria, (err, tags) ->
+            req.store.tags= tags
+
+            if not tags and not err
+                res.status 404
+                err= 'server store tags not found'
 
             console.log 'load server store:', req.store
             next err

@@ -17,11 +17,79 @@
             color: #333 !important;
             text-decoration: none !important;
         }
+        & > a:hover {
+            background-color: #f9f9f9;
+        }
     }
 
     & > li > a {
         padding: 5px 15px;
         line-height: 20px;
+    }
+}
+
+.nav-tag {
+    &s {
+        margin-top: 0;
+    }
+
+    position: relative;
+
+    & > ul {
+        margin: 0; padding: 0 0 0 15px;
+        list-style: none;
+
+        & > li {
+            display: block;
+            & > a {
+                display: block;
+                padding: 5px 15px;
+                line-height: 20px;
+            }
+        }
+    }
+
+    &--act {
+        display: inline-block;
+        position: absolute; top: 0; right: 0;
+
+        width: 35px;
+
+        margin: 0;
+        padding: 0;
+        line-height: 30px;
+
+        border: 0;
+        border-left: 1px solid #fff;
+
+        background: none;
+
+        &:hover, &:focus {
+            background-color: #f9f9f9;
+        }
+    }
+
+    & > a {
+        &:hover {
+            background: transparent;
+        }
+    }
+
+    &.selected {
+        & > a {
+            color: #333 !important;
+            text-decoration: none !important;
+            background-color: #eeeeee !important;
+            //box-shadow: inset -1px 0 0 0 black;
+        }
+    }
+
+    &.expanded {
+        //box-shadow: inset -1px 0 0 0 #eee;
+        & > a {
+            font-weight: 700;
+            //box-shadow: inset -1px 0 0 0 black;
+        }
     }
 }
 

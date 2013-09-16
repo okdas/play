@@ -1,5 +1,6 @@
 app= angular.module 'app', ['ngRoute', 'ngResource', 'ngAnimate'], ($routeProvider) ->
 
+
     $routeProvider.when '/',
         templateUrl: 'partials/', controller: 'PlayCtrl'
 
@@ -20,6 +21,8 @@ app= angular.module 'app', ['ngRoute', 'ngResource', 'ngAnimate'], ($routeProvid
     $routeProvider.when '/store/:server',
         templateUrl: 'partials/store/server/', controller: 'StoreServerCtrl'
 
+    $routeProvider.when '/store/:server/:tag',
+        templateUrl: 'partials/store/server/', controller: 'StoreServerCtrl'
 
     $routeProvider.when '/storage',
         templateUrl: 'partials/storage/', controller: 'StorageCtrl'
@@ -85,10 +88,10 @@ app.controller 'ViewCtrl', ($scope, $rootScope, $location, $window, Player, Serv
         $rootScope.dialog.overlay= null
 
 
-    $rootScope.view= {}
-    $rootScope.view.dialog=
-        overlay: null
-        state: null
+    $rootScope.view=
+        dialog:
+            overlay: null
+            state: null
 
     $rootScope.showViewDialog= (type) ->
         $rootScope.view.dialog.error= null
@@ -160,6 +163,7 @@ app.controller 'PlayerPaymentCtrl', ($scope, $rootScope, $routeParams, PlayerPay
         $scope.state= 'ready'
 
 
+
 app.factory 'ServerStore', ($resource) ->
     $resource '/api/v1/servers/:serverId/store', {serverId:'@id'},
         get: {method:'GET', cache:true, params:{serverId:'@id'}}
@@ -169,7 +173,6 @@ app.factory 'ServerStoreItem', ($resource) ->
     ,   {serverId:'@serverId', itemId:'@itemId'}
     ,
         order: {method:'POST', params:{action:'order'}}
-
 
 app.factory 'Server', ($resource) ->
     $resource '/api/v1/servers/:serverId', {serverId:'@id'},
@@ -184,8 +187,6 @@ app.factory 'ServerStorageItem', ($resource) ->
     ,   {serverId:'@serverId', itemId:'@itemId'}
     ,
         order: {method:'POST', params:{action:'order'}}
-
-
 
 
 
@@ -485,7 +486,69 @@ app.controller 'StoreCtrl', ($scope, $rootScope, $q, $log) ->
 
 
 
-app.controller 'StoreServerCtrl', ($scope, $rootScope, $q, $routeParams, ServerStore, $log) ->
+app.factory '$thesaurus', ($log) ->
+    $thesaurus=
+
+        ### Собирает теги ###
+        linkTags: (tags) ->
+            #console.group('$thesaurus.linkTags', tags)
+
+            idx= {}
+            #console.group('Подготовить индекс...')
+            for t in tags
+                if not tag= idx[t.id]
+                    tag= idx[t.id]= t
+                continue if not tag.tags
+                tag.tags= tag.tags.split ','
+            #console.info '...индекс', idx
+            #console.groupEnd()
+
+            nodes= []
+            #console.group('Собрать дерево...')
+            for t in tags
+                if not t.tags # корневой тег
+                    nodes.push t
+                if t.tags
+                    #console.group('Собрать тег', t)
+                    ids= t.tags
+                    t.tags= []
+                    for id in ids
+                        continue if not tag= idx[id]
+                        t.tags.push tag
+                        if not tag.nodes
+                            tag.nodes= []
+                        tag.nodes.push t
+                    #console.info '...тег', t
+                    #console.groupEnd()
+            #console.info '...дерево', nodes
+            #console.groupEnd()
+            nodes
+
+        ### Собирает предметы тегов ###
+        linkTagsItems: (tags, items) ->
+            #console.group('$thesaurus.linkTagsItems', tags, items)
+
+            idx= {}
+            for t in tags
+                if not tag= idx[t.id]
+                    tag= idx[t.id]= t
+
+            #console.group('Собрать списки...')
+            for item in items
+                continue if not item.tags
+                ids= item.tags.split ','
+                item.tags= []
+                for id in ids
+                    continue if not tag= idx[id]
+                    if not tag.items
+                        tag.items= []
+                    tag.items.push item
+                    item.tags.push tag
+            #console.info '...списки', tags, items
+            #console.groupEnd()
+            items
+
+app.controller 'StoreServerCtrl', ($scope, $rootScope, $q, $route, $routeParams, ServerStore, $log, $thesaurus, $location) ->
     $rootScope.route= 'store'
 
     $scope.state= null
@@ -501,6 +564,27 @@ app.controller 'StoreServerCtrl', ($scope, $rootScope, $q, $routeParams, ServerS
             ,   (store) ->
                     $scope.store= store
                     $scope.state= 'ready'
+
+                    # link tags
+                    $scope.nodes= $thesaurus.linkTags $scope.store.tags
+
+                    # link items tags
+                    $scope.items= $thesaurus.linkTagsItems $scope.store.tags, $scope.store.items
+
+                    # select tag
+                    for tag in $scope.store.tags
+                        if tag.name == $routeParams.tag
+                            $scope.tag= tag
+                            tag.selected= true
+                            tag.expanded= true if tag.nodes and tag.nodes.length
+                            if tag.tags and tag.tags.length
+                                for t in tag.tags
+                                    t.expanded= true
+
+                            $scope.items= tag.items
+
+                            $scope.search.q= tag.titleRuSingular
+
             ,   (err) ->
                     $scope.state= 'error'
                     $scope.error= err
@@ -513,10 +597,26 @@ app.controller 'StoreServerCtrl', ($scope, $rootScope, $q, $routeParams, ServerS
         q: ''
     $scope.searchClear= () ->
         $scope.search.q= ''
+        if $routeParams.tag
+            $location.path "/store/#{$routeParams.server}"
 
+    $scope.search= (item) ->
+        return item if not q= $scope.search.q
 
+        q= do q.toLowerCase
 
+        return item if 0 == item.material.indexOf q
 
+        pattern= new RegExp q, 'i'
+
+        return item if pattern.test item.titleRu
+        return item if pattern.test item.titleEn
+
+        return if not item.tags
+
+        for tag in item.tags
+            return item if pattern.test tag.titleRuSingular
+            return item if pattern.test tag.titleEnSingular
 
 
 app.controller 'StorageCtrl', ($scope, $rootScope, $q, $log) ->
@@ -571,7 +671,7 @@ app.controller 'StorageServerCtrl', ($scope, $rootScope, $q, $routeParams, Serve
 app.controller 'StoreServerItemCtrl', ($scope, $rootScope) ->
 
     $scope.showItemDetails= () ->
-        $rootScope.item= $scope.item
+        $scope.view.dialog.item= $scope.item
         $scope.showViewDialog 'item'
 
 
@@ -711,10 +811,13 @@ app.controller 'StoreServerItemDetailsCtrl', ($scope, $rootScope, ServerStoreIte
         order=
             serverId: $scope.server.id
             itemId: item.id
-            item: item
+            item:
+                id: item.id
+                amount: item.amount
+                enchantments: item.enchantments
         ServerStoreItem.order order, () ->
                 $scope.orderState= 'done'
-        ,   () ->
+        ,   (error) ->
                 $scope.orderState= 'fail'
 
 
@@ -776,3 +879,49 @@ app.directive 'bDropdown', () ->
     ($scope, $e, $a) ->
         $e.attr 'data-target', '#'
         do $e.dropdown
+
+
+
+app.directive 'navTags', ($parse, $compile) ->
+    directive=
+        scope: false
+        transclude: true
+
+        template: """
+            <li class='nav-tag' ng-repeat="tag in nodes" nav-tag="tag" ng-class="{expanded:tag.expanded&&deep, selected:tag.selected}"></li>
+        """
+
+        compile: (e, a, transclude) ->
+            ($scope, $e, $a) ->
+                $scope.nodes= $parse($a.navTags)($scope)
+
+                $scope.deep= $parse($a.deep)($scope) or false
+
+                transclude $scope, ($t) ->
+                    $e.prepend $t
+
+app.directive 'navTag', ($parse, $compile) ->
+    directive=
+        scope: false
+        transclude: true
+        template: """
+            <a ng-href="#/store/{{server.name}}/{{node.name}}"> {{node.titleRuPlural}}</a>
+        """
+
+        controller: ($scope) ->
+            $scope.expand= () ->
+                $scope.node.expanded= true
+                return false
+            $scope.collapse= () ->
+                $scope.node.expanded= false
+                return false
+
+        compile: (e, a, transclude) ->
+            ($scope, $e, $a) ->
+                $scope.node= $parse($a.navTag)($scope)
+                if $scope.deep and angular.isArray $scope.node.nodes
+                    $e.append $compile("""
+                        <button class="nav-tag--act" ng-if="!node.expanded" ng-click="expand()"><i class="icon-angle-right"></i></button>
+                        <button class="nav-tag--act" ng-if="!!node.expanded" ng-click="collapse()"><i class="icon-angle-down"></i></button>
+                        <ul class='nav nav-list' nav-tags="node.nodes" ng-show="!!node.expanded"></ul>
+                    """)($scope)
