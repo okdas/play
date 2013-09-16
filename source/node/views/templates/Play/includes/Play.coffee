@@ -888,7 +888,7 @@ app.directive 'navTags', ($parse, $compile) ->
         transclude: true
 
         template: """
-            <li class='nav-tag' ng-repeat="tag in nodes" nav-tag="tag" ng-class="{expanded:tag.expanded, selected:tag.selected}"></li>
+            <li class='nav-tag' ng-repeat="tag in nodes" nav-tag="tag" ng-class="{expanded:tag.expanded&&deep, selected:tag.selected}"></li>
         """
 
         compile: (e, a, transclude) ->
