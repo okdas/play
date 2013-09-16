@@ -1,9 +1,10 @@
 module.exports= (grunt) ->
+
     grunt.initConfig
         pkg: grunt.file.readJSON 'package.json'
 
         clean:
-            all: ['<%= pkg.config.build.app.node %>/']
+            all: ['<%= pkg.config.app.node %>/']
 
         coffee:
             main:
@@ -11,9 +12,9 @@ module.exports= (grunt) ->
                     bare: true
                 files: [{
                     expand: true
-                    cwd: '<%= pkg.config.build.src.root %>'
+                    cwd: '<%= pkg.config.src.root %>'
                     src: ['**/*.coffee']
-                    dest: '<%= pkg.config.build.app.root %>'
+                    dest: '<%= pkg.config.app.root %>'
                     ext: '.js'
                 }]
 
@@ -24,9 +25,9 @@ module.exports= (grunt) ->
                     space: 2
                 files: [{
                     expand: true
-                    cwd: '<%= pkg.config.build.src.root %>'
+                    cwd: '<%= pkg.config.src.root %>'
                     src: ['**/*.yaml', '**/*.yml', '!**/views/**']
-                    dest: '<%= pkg.config.build.app.root %>/'
+                    dest: '<%= pkg.config.app.root %>/'
                     ext: '.json'
                 }]
 
@@ -37,9 +38,9 @@ module.exports= (grunt) ->
                         debug: false
                 files: [{
                     expand: true
-                    cwd: '<%= pkg.config.build.src.node %>/views/templates'
+                    cwd: '<%= pkg.config.src.views.templates.cwd %>'
                     src: ['**/*.jade', '!**/layout.jade']
-                    dest: '<%= pkg.config.build.app.node %>/views/templates'
+                    dest: '<%= pkg.config.app.views.templates.cwd %>'
                     ext: '.html'
                 }]
 
@@ -47,9 +48,9 @@ module.exports= (grunt) ->
             compile:
                 files: [{
                     expand: true
-                    cwd: '<%= pkg.config.build.src.node %>/views/assets/styles'
+                    cwd: '<%= pkg.config.src.views.assets.cwd %>/styles'
                     src: ['**/*.less']
-                    dest: '<%= pkg.config.build.app.node %>/views/assets/styles'
+                    dest: '<%= pkg.config.app.views.assets.cwd %>/styles'
                     ext: '.css'
                 }]
 
@@ -57,39 +58,22 @@ module.exports= (grunt) ->
             views:
                 files: [{
                     expand: true
-                    cwd: '<%= pkg.config.build.src.node %>/views/assets'
+                    cwd: '<%= pkg.config.src.views.assets.cwd %>'
                     src: ['**/*', '!**/components/**', '!**/*.less', '!**/*.jade', '!**/*.coffee', '!**/*.md']
-                    dest: '<%= pkg.config.build.app.node %>/views/assets'
+                    dest: '<%= pkg.config.app.views.assets.cwd %>'
                 }, {
                     expand: true
-                    cwd: '<%= pkg.config.build.src.node %>/views/assets/components/font-awesome/font'
+                    cwd: '<%= pkg.config.src.views.assets.cwd %>/components/font-awesome/font'
                     src: ['**/*']
-                    dest: '<%= pkg.config.build.app.node %>/views/assets/fonts/awesome'
+                    dest: '<%= pkg.config.app.views.assets.cwd %>/fonts/awesome'
                 }]
             sql:
                 files: [{
                     expand: true
-                    cwd: '<%= pkg.config.build.src.node %>/db/sql'
+                    cwd: '<%= pkg.config.src.node %>/db/sql'
                     src: ['**/*.sql']
-                    dest: '<%= pkg.config.build.app.node %>/db/sql'
+                    dest: '<%= pkg.config.app.node %>/db/sql'
                 }]
-
-        #coffeelint:
-        #    app:
-        #        options:
-        #            indentation:
-        #                level: 'error'
-        #                value: 4
-        #            line_endings:
-        #                value: 'unix'
-        #                level: 'error'
-        #            max_line_length:
-        #                level: 'warn'
-        #        files: [
-        #            {
-        #                src: '<%= pkg.config.build.src.root %>/**/*.coffee'
-        #            }
-        #        ]
 
         docco:
             debug:
@@ -97,8 +81,17 @@ module.exports= (grunt) ->
                 options:
                     output: 'spec/docs/'
 
-
-
+        watch:
+            jade:
+                files: ['**/*.jade', '**/*.coffee']
+                tasks: ['jade']
+                options:
+                    cwd: '<%= pkg.config.src.views.templates.cwd %>'
+            less:
+                files: ['**/*.less']
+                tasks: ['less']
+                options:
+                    cwd: '<%= pkg.config.src.views.assets.cwd %>'
 
     grunt.loadNpmTasks 'grunt-contrib-clean'
     grunt.loadNpmTasks 'grunt-contrib-copy'
@@ -106,9 +99,9 @@ module.exports= (grunt) ->
     grunt.loadNpmTasks 'grunt-contrib-jade'
     grunt.loadNpmTasks 'grunt-contrib-less'
     grunt.loadNpmTasks 'grunt-yaml'
-    #grunt.loadNpmTasks 'grunt-coffeelint'
+    grunt.loadNpmTasks 'grunt-contrib-watch'
     grunt.loadNpmTasks 'grunt-docco'
 
     grunt.registerTask 'default', ['clean', 'yaml', 'coffee', 'jade', 'less', 'copy']
-    #grunt.registerTask 'lint', ['coffeelint']
+    grunt.registerTask 'dev', ['watch']
     grunt.registerTask 'doc', ['docco']
