@@ -114,6 +114,8 @@ module.exports= (cfg, log, done) ->
         maria.Player.Message= require './models/Player/Message'
 
         maria.Server= require './models/Server'
+        maria.Server.Tag= require './models/Server/Tag'
+
         maria.Server.Storage= require './models/Server/Storage'
         maria.Server.Storage.Item= require './models/Server/Storage/Item'
 
@@ -121,7 +123,6 @@ module.exports= (cfg, log, done) ->
         maria.Server.Store.Enchantment= require './models/Server/Store/Enchantment'
         maria.Server.Store.Item= require './models/Server/Store/Item'
         maria.Server.Store.Item.Enchantment= require './models/Server/Store/Item/Enchantment'
-        maria.Server.Store.Tag= require './models/Server/Store/Tag'
 
         app.use (req, res, next) ->
             req.db= app.db

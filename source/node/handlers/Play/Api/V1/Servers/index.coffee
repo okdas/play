@@ -51,7 +51,9 @@ app.on 'mount', (parent) ->
     ,   loadServerStorageItems(
             maria.Server.Storage.Item
         )
-
+    ,   loadServerStorageTags(
+            maria.Server.Tag
+        )
     ,   (req, res) ->
 
             res.json 200, req.storage
@@ -80,7 +82,7 @@ app.on 'mount', (parent) ->
             maria.Server.Store.Item.Enchantment
         )
     ,   loadServerStoreTags(
-            maria.Server.Store.Tag
+            maria.Server.Tag
         )
 
     ,   (req, res) ->
@@ -183,6 +185,22 @@ loadServerStorageItems= (ServerStorageItem) ->
             console.log 'load server storage:', req.storage
             next err
 
+loadServerStorageTags= (ServerTag) ->
+    (req, res, next) ->
+        serverId= req.storage.serverId
+
+        console.log 'load server `%s` storage tags...', serverId
+
+        ServerTag.query serverId, req.maria, (err, tags) ->
+            req.storage.tags= tags
+
+            if not tags and not err
+                res.status 404
+                err= 'server storage tags not found'
+
+            console.log 'load server storage:', req.storage
+            next err
+
 loadServerStore= (param, ServerStore) ->
     (req, res, next) ->
         req.store= null
@@ -268,13 +286,13 @@ loadServerStoreItemsEnchantments= (ServerStoreItemEnchantment) ->
             console.log 'load server store:', req.store
             next err
 
-loadServerStoreTags= (ServerStoreTag) ->
+loadServerStoreTags= (ServerTag) ->
     (req, res, next) ->
         serverId= req.store.serverId
 
         console.log 'load server `%s` store tags...', serverId
 
-        ServerStoreTag.query serverId, req.maria, (err, tags) ->
+        ServerTag.query serverId, req.maria, (err, tags) ->
             req.store.tags= tags
 
             if not tags and not err

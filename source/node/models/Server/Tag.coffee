@@ -1,4 +1,4 @@
-module.exports= class ServerStoreTag
+module.exports= class ServerTag
     @table= 'server_tag'
     @tableTag= 'tag'
     @tableTagTags= 'tag_tags'
