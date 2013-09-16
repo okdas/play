@@ -1,18 +1,16 @@
 extends ../layout
 
 
+
 append section--side
+
     ul.nav.nav-list
         li(ng-class="{active:!search.q}", ng-click="searchClear()"): a(ng-href="#/store/{{server.name}}") Предметы в продаже
         li.nav-list--sep
-        li: a(ng-href="#/store/{{server.name}}/dialy") Предмет дня
 
-        li.nav-list--header Предметы по типам
-        li: a(ng-href="#/store/{{server.name}}/blocks") Блоки
-        li: a(ng-href="#/store/{{server.name}}/materials") Материалы
-
-        li.nav-list--header Предметы по тегам
-    ul.nav.nav-list.nav-tags(nav-tags="tags")
+    ul.nav.nav-list.nav-tags(ng-repeat="node in nodes", nav-tags="node.nodes", deep="'tags'==node.name")
+        li.nav-list--header(ng-if="'types'==node.name") Предметы по типам
+        li.nav-list--header(ng-if="'tags'==node.name") Предметы по тегам
 
 
 

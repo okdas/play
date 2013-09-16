@@ -566,7 +566,7 @@ app.controller 'StoreServerCtrl', ($scope, $rootScope, $q, $route, $routeParams,
                     $scope.state= 'ready'
 
                     # link tags
-                    $scope.tags= $thesaurus.linkTags $scope.store.tags
+                    $scope.nodes= $thesaurus.linkTags $scope.store.tags
 
                     # link items tags
                     $scope.items= $thesaurus.linkTagsItems $scope.store.tags, $scope.store.items
@@ -895,6 +895,11 @@ app.directive 'navTags', ($parse, $compile) ->
             ($scope, $e, $a) ->
                 $scope.nodes= $parse($a.navTags)($scope)
 
+                $scope.deep= $parse($a.deep)($scope) or false
+
+                transclude $scope, ($t) ->
+                    $e.prepend $t
+
 app.directive 'navTag', ($parse, $compile) ->
     directive=
         scope: false
@@ -914,9 +919,9 @@ app.directive 'navTag', ($parse, $compile) ->
         compile: (e, a, transclude) ->
             ($scope, $e, $a) ->
                 $scope.node= $parse($a.navTag)($scope)
-                if angular.isArray $scope.node.nodes
+                if $scope.deep and angular.isArray $scope.node.nodes
                     $e.append $compile("""
                         <button class="nav-tag--act" ng-if="!node.expanded" ng-click="expand()"><i class="icon-angle-right"></i></button>
                         <button class="nav-tag--act" ng-if="!!node.expanded" ng-click="collapse()"><i class="icon-angle-down"></i></button>
-                        <ul class='nav nav-list' nav-tags="node.nodes" ng-show="!!node.expanded">Потомки</ul>
+                        <ul class='nav nav-list' nav-tags="node.nodes" ng-show="!!node.expanded"></ul>
                     """)($scope)
