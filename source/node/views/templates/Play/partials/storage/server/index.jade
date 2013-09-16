@@ -2,6 +2,18 @@ extends ../layout
 
 
 
+append section--side
+
+    ul.nav.nav-list
+        li(ng-class="{active:!search.q}", ng-click="searchClear()"): a(ng-href="#/storage/{{server.name}}") Все предметы
+        li.nav-list--sep
+
+    ul.nav.nav-list.nav-tags(ng-repeat="node in nodes", nav-tags="node.nodes", deep="'tags'==node.name", ng-init="href='#/storage'")
+        li.nav-list--header(ng-if="'types'==node.name") Предметы по типам
+        li.nav-list--header(ng-if="'tags'==node.name") Предметы по тегам
+
+
+
 append section--main
     .storage--server
 
@@ -9,7 +21,6 @@ append section--main
             .input-rich
                 input.input(placeholder='Поиск предметов', ng-model="search.q", required)
                 a.input-action(ng-show="!!search.q", ng-click="searchClear()"): i.icon-remove
-
 
         .server--items
             .item(ng-repeat='item in storage.items | filter:search.q', ng-controller='StoreServerItemCtrl'): .row

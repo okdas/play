@@ -8,7 +8,7 @@ append section--side
         li(ng-class="{active:!search.q}", ng-click="searchClear()"): a(ng-href="#/store/{{server.name}}") Предметы в продаже
         li.nav-list--sep
 
-    ul.nav.nav-list.nav-tags(ng-repeat="node in nodes", nav-tags="node.nodes", deep="'tags'==node.name")
+    ul.nav.nav-list.nav-tags(ng-repeat="node in nodes", nav-tags="node.nodes", deep="'tags'==node.name", ng-init="href='#/store'")
         li.nav-list--header(ng-if="'types'==node.name") Предметы по типам
         li.nav-list--header(ng-if="'tags'==node.name") Предметы по тегам
 

@@ -24,10 +24,14 @@ app= angular.module 'app', ['ngRoute', 'ngResource', 'ngAnimate'], ($routeProvid
     $routeProvider.when '/store/:server/:tag',
         templateUrl: 'partials/store/server/', controller: 'StoreServerCtrl'
 
+
     $routeProvider.when '/storage',
         templateUrl: 'partials/storage/', controller: 'StorageCtrl'
 
     $routeProvider.when '/storage/:server',
+        templateUrl: 'partials/storage/server/', controller: 'StorageServerCtrl'
+
+    $routeProvider.when '/storage/:server/:tag',
         templateUrl: 'partials/storage/server/', controller: 'StorageServerCtrl'
 
 
@@ -635,7 +639,7 @@ app.controller 'StorageCtrl', ($scope, $rootScope, $q, $log) ->
 
 
 
-app.controller 'StorageServerCtrl', ($scope, $rootScope, $q, $routeParams, ServerStorage, $log) ->
+app.controller 'StorageServerCtrl', ($scope, $rootScope, $q, $routeParams, ServerStorage, $log, $thesaurus, $location) ->
     $rootScope.route= 'storage'
     $scope.storage= null
 
@@ -651,6 +655,27 @@ app.controller 'StorageServerCtrl', ($scope, $rootScope, $q, $routeParams, Serve
                 serverId: server.id
             ,   (storage) ->
                     $scope.storage= $rootScope.server.storage= storage
+
+                    # link tags
+                    $scope.nodes= $thesaurus.linkTags $scope.storage.tags
+
+                    # link items tags
+                    $scope.items= $thesaurus.linkTagsItems $scope.storage.tags, $scope.storage.items
+
+                    # select tag
+                    for tag in $scope.storage.tags
+                        if tag.name == $routeParams.tag
+                            $scope.tag= tag
+                            tag.selected= true
+                            tag.expanded= true if tag.nodes and tag.nodes.length
+                            if tag.tags and tag.tags.length
+                                for t in tag.tags
+                                    t.expanded= true
+
+                            $scope.items= tag.items
+
+                            $scope.search.q= tag.titleRuSingular
+
                     $scope.state= 'ready'
             ,   (err) ->
                     $scope.state= 'error'
@@ -664,6 +689,8 @@ app.controller 'StorageServerCtrl', ($scope, $rootScope, $q, $routeParams, Serve
         q: ''
     $scope.searchClear= () ->
         $scope.search.q= ''
+        if $routeParams.tag
+            $location.path "/storage/#{$routeParams.server}"
 
 
 
@@ -905,7 +932,7 @@ app.directive 'navTag', ($parse, $compile) ->
         scope: false
         transclude: true
         template: """
-            <a ng-href="#/store/{{server.name}}/{{node.name}}"> {{node.titleRuPlural}}</a>
+            <a ng-href="{{href}}/{{server.name}}/{{node.name}}"> {{node.titleRuPlural}}</a>
         """
 
         controller: ($scope) ->
