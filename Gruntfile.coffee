@@ -81,13 +81,27 @@ module.exports= (grunt) ->
                 options:
                     output: 'spec/docs/'
 
+        watch:
+            jade:
+                files: ['**/*.jade', '**/*.coffee']
+                tasks: ['jade']
+                options:
+                    cwd: '<%= pkg.config.src.views.templates.cwd %>'
+            less:
+                files: ['**/*.less']
+                tasks: ['less']
+                options:
+                    cwd: '<%= pkg.config.src.views.assets.cwd %>'
+
     grunt.loadNpmTasks 'grunt-contrib-clean'
     grunt.loadNpmTasks 'grunt-contrib-copy'
     grunt.loadNpmTasks 'grunt-contrib-coffee'
     grunt.loadNpmTasks 'grunt-contrib-jade'
     grunt.loadNpmTasks 'grunt-contrib-less'
     grunt.loadNpmTasks 'grunt-yaml'
+    grunt.loadNpmTasks 'grunt-contrib-watch'
     grunt.loadNpmTasks 'grunt-docco'
 
     grunt.registerTask 'default', ['clean', 'yaml', 'coffee', 'jade', 'less', 'copy']
+    grunt.registerTask 'dev', ['watch']
     grunt.registerTask 'doc', ['docco']
