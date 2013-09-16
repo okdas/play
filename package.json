@@ -3,31 +3,38 @@
   "repository": { "type": "git", "url": "https://github.com/okdas/play.git" },
   "private": true,
   "config": {
-    "build": {
-      "app": {
-        "root": "app",
-        "node": "app/node"
-      },
-      "src": {
-        "root": "source",
-        "node": "source/node"
+    "app": {
+      "root": "app",
+      "node": "app/node",
+      "views": {
+        "assets": {"cwd":"app/node/views/assets"},
+        "templates": {"cwd":"app/node/views/templates"}
+      }
+    },
+    "src": {
+      "root": "source",
+      "node": "source/node",
+      "views": {
+        "assets": {"cwd":"source/node/views/assets"},
+        "templates": {"cwd":"source/node/views/templates"}
       }
     }
   },
   "scripts": {
     "start": "grunt && node app/node.js",
-    "build": "grunt"
+    "build": "grunt",
+    "watch": "grunt watch"
   },
   "devDependencies": {
-    "grunt": "0.4.1",
-    "grunt-contrib-clean": "0.5.0",
-    "grunt-contrib-copy": "0.4.1",
+    "coffee-script"       : "1.6.3",
+    "grunt"               : "0.4.1",
+    "grunt-contrib-clean" : "0.5.0",
+    "grunt-contrib-copy"  : "0.4.1",
     "grunt-contrib-coffee": "0.7.0",
-    "grunt-contrib-jade": "0.8.0",
-    "grunt-contrib-less": "0.6.4",
-    "grunt-yaml": "0.2.1",
-    "grunt-cli": "0.1.9",
-    "coffee-script": "1.6.3"
+    "grunt-contrib-jade"  : "0.8.0",
+    "grunt-contrib-less"  : "0.6.4",
+    "grunt-yaml"          : "0.2.1",
+    "grunt-cli"           : "0.1.9"
   },
   "engines": {
     "node": "0.10.17"
