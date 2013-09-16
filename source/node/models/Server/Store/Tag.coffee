@@ -31,7 +31,7 @@ module.exports= class ServerStoreTag
                 Tag.titleEnPlural,
                 Tag.titleEnSingular,
 
-                GROUP_CONCAT(TagTags.childId) as tags
+                GROUP_CONCAT(TagTags.tagId) as tags
 
               FROM
                 ?? as ServerTag
@@ -40,7 +40,7 @@ module.exports= class ServerStoreTag
                 ON Tag.id= ServerTag.tagId
               LEFT OUTER JOIN
                 ?? as TagTags
-                ON TagTags.tagId = Tag.id
+                ON TagTags.childId = Tag.id
 
              WHERE
                 ServerTag.serverId = ?

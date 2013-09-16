@@ -281,39 +281,6 @@ loadServerStoreTags= (ServerStoreTag) ->
                 res.status 404
                 err= 'server store tags not found'
 
-            if not err
-
-                idx= {}
-                for t in tags
-                    tag= idx[t.id]
-                    if not tag
-                        tag= idx[t.id]= t
-                        tag.root= true
-
-                for t in tags
-                    tag= idx[t.id]
-
-                    if tag.tags and tag.tags.length
-                        tagTags= []
-                        ids= tag.tags.split ','
-                        for id in ids
-                            tagTag= idx[id]
-                            if tagTag
-                                tagTags.push tagTag
-                                tagTag.root= false
-                        if tagTags.length
-                            tag.tags= tagTags
-                        else
-                            tag.tags= null
-
-                root= []
-                for t in tags
-                    if t.root
-                        root.push t
-
-                req.store.tags= root
-
-
             console.log 'load server store:', req.store
             next err
 
