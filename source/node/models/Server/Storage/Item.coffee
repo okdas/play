@@ -1,6 +1,8 @@
 module.exports= class ServerStorageItem
     @table= 'player_item'
+
     @tableMaterial= 'bukkit_material'
+    @tableItemTag= 'item_tag'
 
     constructor: (data) ->
         @id= data.id
@@ -15,6 +17,8 @@ module.exports= class ServerStorageItem
 
         @material= data.material
         @enchantability= data.enchantability
+
+        @tags= data.tags or null
 
         @createdAt= data.createdAt
 
@@ -39,19 +43,30 @@ module.exports= class ServerStorageItem
                 Material.id as material,
                 Material.enchantability as enchantability,
 
+                GROUP_CONCAT(ItemTag.tagId) as tags,
+
                 PlayerItem.createdAt
-            FROM
+
+              FROM
                 ?? as PlayerItem
-            JOIN
+              JOIN
                 ?? as Material
                 ON Material.id= PlayerItem.material
-            WHERE
+              LEFT OUTER JOIN
+                ?? as ItemTag
+                ON ItemTag.itemId= PlayerItem.id
+
+             WHERE
                 PlayerItem.serverId = ?
-            ORDER BY
+
+             GROUP BY
+                PlayerItem.id
+
+             ORDER BY
                 PlayerItem.createdAt DESC,
                 material, CAST(material AS SIGNED)
             "
-        ,   [@table, @tableMaterial, serverId]
+        ,   [@table, @tableMaterial, @tableItemTag, serverId]
         ,   (err, rows) =>
 
                 items= null
