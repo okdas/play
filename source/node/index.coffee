@@ -101,6 +101,10 @@ module.exports= (cfg, log, done) ->
                     return next err if err
                     req.maria.query 'START TRANSACTION', (err) ->
                         req.maria.transaction= true if not err
+
+                        req.on 'end', ->
+                            console.log 'запрос завершен. завершить транзакцию', req.status()
+
                         return next err
 
         maria.transaction.commit= () ->
@@ -110,8 +114,11 @@ module.exports= (cfg, log, done) ->
                     return next err
 
         maria.Player= require './models/Player'
+        maria.Player.Balance= require './models/Player/Balance'
         maria.Player.Pex= require './models/Player/Pex'
         maria.Player.Message= require './models/Player/Message'
+
+        maria.Player.Item= require './models/Player/Item'
 
         maria.Server= require './models/Server'
         maria.Server.Tag= require './models/Server/Tag'

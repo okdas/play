@@ -63,12 +63,6 @@ app.on 'mount', (parent) ->
     ,   require './Play/Api/V1/Player/Subscriptions'
 
     ###
-    Методы API для работы игрока с магазином.
-    ###
-    app.use '/api/v1/store'
-    ,   require './Play/Api/V1/Store'
-
-    ###
     Методы API для работы с серверами.
     ###
     app.use '/api/v1/servers'
@@ -92,6 +86,7 @@ app.on 'mount', (parent) ->
     Обрабатывает ошибку
     ###
     app.use (err, req, res, next) ->
+        console.log 'ERROR!', err
         res.status 500
         res.json
             name: err.name

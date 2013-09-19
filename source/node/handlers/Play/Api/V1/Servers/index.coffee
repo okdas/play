@@ -92,9 +92,16 @@ app.on 'mount', (parent) ->
 
 
     ###
-    Отдает предмет из магазина сервера аутентифицированному игроку.
+    Покупает предмет сервера аутентифицированному игроку.
+
+    Перед покупкой следующие условия должны быть удовлетворены:
+    — Покупаемое кол-во предметов делится без остатка на продаваемое кол-во
+
+    Стоимость предмета хранится в базе данных.
+
+    Стоимость зачарованного предмета
     ###
-    app.get '/:serverId(\\d+)/store/items/:itemId'
+    app.post '/:serverId(\\d+)/store/items/:itemId(\\d+)/order'
 
     ,   access
 
@@ -103,19 +110,63 @@ app.on 'mount', (parent) ->
     ,   loadServerStore('serverId',
             maria.Server.Store
         )
-    ,   loadServerStoreEnchantments(
-            maria.Server.Store.Enchantment
-        )
-    ,   loadServerStoreItem('itemId',
-            maria.Server.Store.Item
-        )
-    ,   loadServerStoreItemEnchantments(
-            maria.Server.Store.Item.Enchantment
-        )
 
-    ,   (req, res) ->
+        # Загружает чары в магазин.
+        # Загруженные чары являются экземплярами класса `Server.Store.Enchantment`.
+    ,   (req, res, next) ->
+            serverId= req.store.serverId
+            maria.Server.Store.Enchantment.query serverId, req.maria, (err, enchantments) ->
+                if not err
+                    req.store.setEnchantments enchantments
+                next err
 
-            res.json 200, req.store.item
+        # Загружает указанный предмет в магазин.
+        # Загруженный предмет является экземпляром класса `Server.Store.Item`
+    ,   (req, res, next) ->
+            itemId= req.param 'itemId'
+            maria.Server.Store.Item.get itemId, req.maria, (err, item) ->
+                if not err
+                    item= req.store.addItem item
+                    if item.enchantability and item.enchantments
+                        enchantments= []
+                        for enchantment in item.enchantments
+                            enchantments.push req.store.factoryItemEnchantment enchantment
+                        item.enchantments= enchantments
+                next err
+
+    ,   maria.transaction()
+
+        # Списывает стоимость предмета со счета игрока.
+    ,   (req, res, next) ->
+            playerId= req.user.id
+            orig= req.store.getItem req.body.item
+            item= req.item= req.store.factoryItem req.body.item
+            xp= item.calcXp() - orig.calcXp()
+            price= Math.round( ((xp * 0.03) + orig.price) * 100 ) / 100
+            price= price * (item.amount / orig.amount)
+            maria.Player.Balance.dec playerId, price, req.maria, (err) ->
+                next err
+
+        # Сохраняет предмет игроку.
+    ,   (req, res, next) ->
+            playerId= req.user.id
+            serverId= req.store.serverId
+            maria.Player.Item.create playerId, serverId, req.item, req.maria, (err, item) ->
+                item.enchantments= req.item.enchantments
+                req.item= item
+                next err
+
+        # Сохраняет чары предмета игроку.
+    ,   (req, res, next) ->
+            return do next if not req.item.enchantments
+            maria.Player.Item.Enchantment.saveItemEnchantments req.item, req.maria, (err, item) ->
+                req.item= item
+                next err
+
+    ,   maria.transaction.commit()
+
+    ,   (req, res, next) ->
+            res.json 201, req.item
 
 
 
@@ -171,18 +222,26 @@ loadServerStorageEnchantments= (ServerStorageEnchantment) ->
 
 loadServerStorageItems= (ServerStorageItem) ->
     (req, res, next) ->
+        playerId= req.user.id
         serverId= req.storage.serverId
-
-        console.log 'load server `%s` storage items...', serverId
-
-        ServerStorageItem.query serverId, req.maria, (err, items) ->
+        ServerStorageItem.query playerId, serverId, req.maria, (err, items) ->
             req.storage.items= items
-
             if not items and not err
                 res.status 404
                 err= 'server storage items not found'
-
-            console.log 'load server storage:', req.storage
+            if not err
+                idx= {}
+                items= []
+                for item, i in req.storage.items
+                    if not item.name and not item.enchantability
+                        if not itm= idx[item.itemId]
+                            itm= idx[item.itemId]= item
+                            items.push itm
+                        else
+                            itm.amount= itm.amount + item.amount
+                    else
+                        items.push item
+                req.storage.items= items
             next err
 
 loadServerStorageTags= (ServerTag) ->
@@ -200,6 +259,9 @@ loadServerStorageTags= (ServerTag) ->
 
             console.log 'load server storage:', req.storage
             next err
+
+
+
 
 loadServerStore= (param, ServerStore) ->
     (req, res, next) ->
@@ -260,6 +322,7 @@ loadServerStoreItemsEnchantments= (ServerStoreItemEnchantment) ->
         for item in req.store.items
             if not item.enchantability
                 continue
+            item.enchantments= []
             if not idx[item.id]
                 idx[item.id]= item
                 ids.push item.id
@@ -298,53 +361,6 @@ loadServerStoreTags= (ServerTag) ->
             if not tags and not err
                 res.status 404
                 err= 'server store tags not found'
-
-            console.log 'load server store:', req.store
-            next err
-
-loadServerStoreItem= (param, ServerStoreItem) ->
-    (req, res, next) ->
-        req.store.item= null
-
-        itemId= req.param param
-
-        console.log 'load server store item `%d`...', itemId
-        ServerStoreItem.get itemId, req.maria, (err, item) ->
-            req.store.item= item
-            if not item and not err
-                res.status 404
-                err= 'server store item not found'
-
-            console.log 'load server store:', req.store
-            next err
-
-loadServerStoreItemEnchantments= (ServerStoreItemEnchantment) ->
-    (req, res, next) ->
-
-        if not req.store.item.enchantability
-            req.store.item.enchantments= null
-            return next null
-
-        itemId= req.store.item.id
-
-        req.store.enchantmentsIdx= {}
-        for enchantment in req.store.enchantments
-            if not req.store.enchantmentsIdx[enchantment.id]
-                req.store.enchantmentsIdx[enchantment.id]= enchantment
-
-        console.log 'load server store item `%d` enchantments...', itemId
-        ServerStoreItemEnchantment.query [itemId], req.maria, (err, enchantments) ->
-            req.store.item.enchantments= []
-
-            if not enchantments and not err
-                err= 'cannot load store item enchantments'
-
-            if not err
-                ench= null
-                for ench in enchantments
-                    if enchantment= req.store.enchantmentsIdx[ench.enchantmentId]
-                        req.store.item.enchantments.push extend {}, enchantment,
-                            level: ench.level
 
             console.log 'load server store:', req.store
             next err

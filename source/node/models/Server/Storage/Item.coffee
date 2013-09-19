@@ -1,11 +1,15 @@
 module.exports= class ServerStorageItem
-    @table= 'player_item'
+    @table= 'player_server_item'
 
-    @tableMaterial= 'bukkit_material'
+    @tableItem= 'item'
+    @tableItemMaterial= 'bukkit_material'
+    @tableItemEnchantment= 'player_server_item_enchantment'
     @tableItemTag= 'item_tag'
 
     constructor: (data) ->
         @id= data.id
+        @itemId= data.itemId
+
         @amount= data.amount
 
         @name= data.name
@@ -22,51 +26,65 @@ module.exports= class ServerStorageItem
 
         @createdAt= data.createdAt
 
-    @query: (serverId, maria, done) ->
+    @query: (playerId, serverId, maria, done) ->
         maria.query "
             SELECT
 
                 PlayerItem.id,
+                PlayerItem.itemId,
+
                 PlayerItem.amount,
 
                 PlayerItem.name,
 
-                PlayerItem.titleRu as itemTitleRu,
+                Item.titleRu as itemTitleRu,
                 Material.titleRu as materialTitleRu,
 
-                PlayerItem.titleEn as itemTitleEn,
+                Item.titleEn as itemTitleEn,
                 Material.titleEn as materialTitleEn,
 
-                PlayerItem.imageUrl as itemImageUrl,
+                Item.imageUrl as itemImageUrl,
                 Material.imageUrl as materialImageUrl,
 
                 Material.id as material,
                 Material.enchantability as enchantability,
 
+                GROUP_CONCAT(DISTINCT CONCAT(ItemEnchantment.enchantmentId, ':', ItemEnchantment.level)
+                    ORDER BY ItemEnchantment.order
+                ) as enchantments,
+
                 GROUP_CONCAT(ItemTag.tagId) as tags,
 
-                PlayerItem.createdAt
+                PlayerItem.updatedAt
 
               FROM
                 ?? as PlayerItem
               JOIN
+                ?? as Item
+                ON Item.id= PlayerItem.itemId
+              JOIN
                 ?? as Material
-                ON Material.id= PlayerItem.material
+                ON Material.id= Item.material
+              LEFT OUTER JOIN
+                ?? as ItemEnchantment
+                ON ItemEnchantment.itemId= PlayerItem.id
               LEFT OUTER JOIN
                 ?? as ItemTag
-                ON ItemTag.itemId= PlayerItem.id
+                ON ItemTag.itemId= Item.id
 
              WHERE
+                PlayerItem.playerId = ?
+               AND
                 PlayerItem.serverId = ?
 
              GROUP BY
                 PlayerItem.id
 
              ORDER BY
-                PlayerItem.createdAt DESC,
+                PlayerItem.updatedAt DESC,
                 material, CAST(material AS SIGNED)
             "
-        ,   [@table, @tableMaterial, @tableItemTag, serverId]
+        ,   [@table, @tableItem, @tableItemMaterial, @tableItemEnchantment, @tableItemTag, playerId, serverId]
         ,   (err, rows) =>
 
                 items= null

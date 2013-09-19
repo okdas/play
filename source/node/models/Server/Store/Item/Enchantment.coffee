@@ -2,18 +2,22 @@ module.exports= class ServerStoreItemEnchantment
     @table= 'item_enchantment'
 
     constructor: (data) ->
-        
+        @id= data.id
+        @titleRu= data.titleRu
+        @titleEn= data.titleEn
+        @levelMin= data.levelMin
+        @levelMax= data.levelMax
+        @level= data.level
+
         @itemId= data.itemId
         @enchantmentId= data.enchantmentId
-        
-        @level= data.level
 
     @query: (ids, maria, done) ->
         enchantments= null
 
         maria.query "
             SELECT
-                
+
                 ItemEnchantment.itemId,
                 ItemEnchantment.enchantmentId,
 
