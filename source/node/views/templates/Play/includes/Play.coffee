@@ -173,7 +173,7 @@ app.factory 'ServerStore', ($resource) ->
         get: {method:'GET', cache:true, params:{serverId:'@id'}}
 
 app.factory 'ServerStoreItem', ($resource) ->
-    $resource '/api/v1/store/servers/:serverId/items/:itemId/:action'
+    $resource '/api/v1/servers/:serverId/store/items/:itemId/:action'
     ,   {serverId:'@serverId', itemId:'@itemId'}
     ,
         order: {method:'POST', params:{action:'order'}}
